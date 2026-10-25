@@ -82,4 +82,4 @@ See limitations for rules [02](../features/02-jwt-misconfiguration/limitations.m
 
 ## Commits
 
-To be recorded after push.
+- `0977c6e` – Add Sentinel Rules pack: 8 Semgrep rule features, tests, CI and docs (branch `claude/zealous-franklin-4fgini`)
