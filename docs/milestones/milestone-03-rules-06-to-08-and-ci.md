@@ -80,4 +80,4 @@ See limitations for rules [06](../features/06-insecure-cookies/limitations.md),
 
 ## Commits
 
-To be recorded after push.
+- `76cceba` – Add Sentinel Rules pack: 8 Semgrep rule features, tests, CI and docs (branch `claude/zealous-franklin-4fgini`)

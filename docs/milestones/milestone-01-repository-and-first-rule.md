@@ -77,4 +77,4 @@ See [SQL injection limitations](../features/01-sql-injection/limitations.md).
 
 ## Commits
 
-To be recorded after push.
+- `76cceba` – Add Sentinel Rules pack: 8 Semgrep rule features, tests, CI and docs (branch `claude/zealous-franklin-4fgini`)
