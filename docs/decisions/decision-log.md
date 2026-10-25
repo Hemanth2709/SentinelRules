@@ -73,9 +73,10 @@
   (still documented, but the default command should work); keeping the
   single-call command in CI (it is fine on Linux, but the local and CI
   commands would differ).
-- **Consequences:** Slightly slower (one Semgrep start per rule file). The
-  Windows fix was verified by the maintainer's report of the failure; the
-  sequential script itself was tested on Linux only.
+- **Consequences:** Slightly slower (one Semgrep start per rule file).
+  Verified on Linux (locally and in CI) and on the maintainer's Windows
+  machine (Git Bash, Python 3.14, Semgrep 1.180.0): all 8 rule files passed
+  with no `PermissionError`, and `check-examples.sh` passed using `python`.
 - **Related:** DEC-003, CI.
 
 ### DEC-004: One rule file per feature; multiple rule IDs allowed
