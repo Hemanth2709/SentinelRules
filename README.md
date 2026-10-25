@@ -150,10 +150,14 @@ Every feature has the same before/after pair in `examples/` and in its
 ## Benchmark
 
 Methodology: [docs/benchmark-methodology.md](docs/benchmark-methodology.md).
-Results: **not yet performed** – see
-[docs/benchmark-results.md](docs/benchmark-results.md). No precision or recall
-figures are claimed until an authorized application has been scanned and its
-findings manually reviewed.
+
+First run (IdentityProvider, a NestJS identity provider with a Next.js SDK,
+2026-10-25): **8 findings, 0 true positives, 8 false positives – precision
+0%**, all from the two authorization heuristics. Seven were caused by a rule
+bug (non-async factories in a `'use server'` file) that has since been fixed
+with a regression test; one is the documented global-guard limitation.
+Recall is not reported. Details:
+[docs/benchmark-results.md](docs/benchmark-results.md).
 
 ## Known limitations
 

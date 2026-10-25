@@ -4,10 +4,10 @@
 
 - Milestone number: 3
 - Planned deadline: 2026-11-15
-- Actual completion date: –
-- Status: In progress
+- Actual completion date: 2026-10-25
+- Status: Complete
 - Related Git commits: see [Commits](#commits)
-- Related pull requests: none yet
+- Related pull requests: [#1](https://github.com/Hemanth2709/SentinelRules/pull/1)
 
 ## Objective
 
@@ -22,8 +22,8 @@ and automate testing in GitHub Actions.
 | CORS rule | `origin: true` / reflected origin with credentials detected; allowlists not flagged | Done |
 | Missing-authorization heuristic | Unguarded routes / handlers flagged; visible protection not flagged | Done |
 | Tests | ≥ 2 positive and ≥ 2 negative per rule | Done |
-| GitHub Actions workflow | Runs on push and pull request; fails on test failure | Written, not yet run on GitHub |
-| CI passing on default branch | Green run on the default branch | **Pending** – work is on a feature branch |
+| GitHub Actions workflow | Runs on push and pull request; fails on test failure | Done – ran on push and on PR #1 |
+| CI passing on default branch | Green run on the default branch | Done – [run #3](https://github.com/Hemanth2709/SentinelRules/actions/runs/40168233347) on `main` |
 
 ## Implementation record
 
@@ -47,7 +47,13 @@ and automate testing in GitHub Actions.
 | `semgrep --validate --config rules/` | exit 0 |
 | `scripts/check-examples.sh` | 16/16 PASS |
 | Mutation: one CORS `ok` annotation changed to `ruleid` in a scratch copy | `semgrep --test` exit 1 (shows CI would fail) |
-| GitHub Actions run | Not yet available |
+| GitHub Actions, branch push | [run #1](https://github.com/Hemanth2709/SentinelRules/actions/runs/40167509704) – success |
+| GitHub Actions, PR #1 | [PR run](https://github.com/Hemanth2709/SentinelRules/actions/runs/40167653635) – success |
+| GitHub Actions, `main` after merge | [run #3](https://github.com/Hemanth2709/SentinelRules/actions/runs/40168233347) – success |
+
+Note: run #3 ran on merge commit `0a4c45e`. `main` history was later
+rewritten to re-author the commits (same files apart from the commit ID in the
+milestone logs); the rewritten head is `2763d51`.
 
 Failures encountered and resolved: cookie rule validation error ("cannot
 negate in an Or"); CORS annotation placement; authorization `$PUBLIC`
@@ -72,12 +78,13 @@ See limitations for rules [06](../features/06-insecure-cookies/limitations.md),
 ## Completion review
 
 - [x] All required tasks are implemented.
-- [x] All required tests pass (locally).
+- [x] All required tests pass.
 - [x] Documentation is updated.
 - [x] Relevant implementation logs are updated.
-- [ ] Acceptance criteria are satisfied (CI on default branch pending).
+- [x] Acceptance criteria are satisfied.
 - [x] Remaining limitations are recorded.
 
 ## Commits
 
+- `2763d51` – Merge pull request #1 (rewritten merge commit on `main`)
 - `0977c6e` – Add Sentinel Rules pack: 8 Semgrep rule features, tests, CI and docs (branch `claude/zealous-franklin-4fgini`)

@@ -20,8 +20,10 @@ Rule file: [`rules/missing-authorization.yml`](../../../rules/missing-authorizat
 1. Either:
    - `export function $HANDLER(...) { ... }` with `$HANDLER` in
      `POST|PUT|PATCH|DELETE` (App Router route handler), or
-   - any exported function after a `'use server'` / `"use server"` directive
-     (Server Action).
+   - an exported **async** function after a `'use server'` / `"use server"`
+     directive (Server Action). Next.js only allows async exports in such a
+     module, so non-async exports (e.g. factories that return actions) are
+     skipped.
 
    The pattern `export function` also matches `export async function`
    (verified during development).

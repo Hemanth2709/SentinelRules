@@ -1,7 +1,23 @@
 # Lessons learned
 
-Recorded during implementation of rules 01–08 on 2026-10-25. Benchmark
-lessons will be added after the application scan.
+Recorded during implementation of rules 01–08 and the first benchmark scan on
+2026-10-25.
+
+## From the first benchmark (IdentityProvider)
+
+- **All 8 findings were false positives**, and all came from the heuristic
+  authorization rules. Fixtures written from the rule author's imagination
+  missed a real-world shape: an SDK file with `'use server'` that exports
+  *factories* returning actions.
+- **A framework rule fixed it.** Next.js only allows async exports in a
+  `'use server'` module, so requiring `export async function` removed 7 of 8
+  false positives without losing any true case.
+- **A regression test must reproduce the failure first.** The first fixture
+  for this bug passed even without the fix, because the inner function used a
+  recognised helper. Only a fixture that failed before the change proved
+  anything.
+- **The global-guard limitation is real.** The one remaining finding is a
+  route protected by `APP_GUARD` in another file, exactly as documented.
 
 ## Harder to detect than expected
 

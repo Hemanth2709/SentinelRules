@@ -102,8 +102,10 @@ rules:
               - metavariable-regex:
                   metavariable: $HANDLER
                   regex: ^(POST|PUT|PATCH|DELETE)$
-          # Exported functions in a 'use server' module are Server Actions,
-          # which are reachable as POST endpoints.
+          # Exported async functions in a 'use server' module are Server
+          # Actions, which are reachable as POST endpoints. Next.js only
+          # allows async exports there, so a plain `export function` (for
+          # example a factory that returns an action) is not an action.
           - patterns:
               - pattern-either:
                   - pattern-inside: |
@@ -112,7 +114,7 @@ rules:
                   - pattern-inside: |
                       "use server";
                       ...
-              - pattern: export function $HANDLER(...) { ... }
+              - pattern: export async function $HANDLER(...) { ... }
       - pattern-not: export function $HANDLER(...) { ... getServerSession(...); ... }
       - pattern-not: export function $HANDLER(...) { ... auth(...); ... }
       - pattern-not: export function $HANDLER(...) { ... getSession(...); ... }

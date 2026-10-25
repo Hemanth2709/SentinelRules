@@ -3,8 +3,9 @@
 This page summarises the false-positive classes documented per rule. Each
 item was either observed in fixtures/ad-hoc scans during development or is a
 known structural limitation of single-file pattern matching. Benchmark
-observations against a real application will be added to
-[benchmark-results.md](benchmark-results.md) once the scan has been done.
+observations are in [benchmark-results.md](benchmark-results.md): the first
+run (IdentityProvider, 2026-10-25) produced 8 findings, all false positives,
+all from the two authorization rules.
 
 | Rule | Main false-positive class | Mitigation |
 |---|---|---|
@@ -16,7 +17,7 @@ observations against a real application will be added to
 | Unsafe HTML | Trusted HTML; sanitized in another function | `nosemgrep` with provenance note |
 | Insecure cookies | Cookies meant to be JS-readable (`csrf_token` double-submit) | `nosemgrep` with reason |
 | CORS | Header-only authentication | Drop `credentials: true` |
-| Missing authorization | Global guards; intentionally public endpoints (login) | `@Public()` marker; disable rule if global guards are used consistently |
+| Missing authorization | Global guards (benchmark: 1 FP); intentionally public endpoints (login); non-async factories in `'use server'` files (benchmark: 7 FPs, fixed) | `@Public()` marker; disable rule if global guards are used consistently |
 
 ## Handling a false positive
 

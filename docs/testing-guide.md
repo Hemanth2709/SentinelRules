@@ -55,5 +55,6 @@ Never weaken a negative test to make an inaccurate rule pass.
 |---|---|---|---|
 | 2026-10-25 | 1.180.0 | `semgrep --test --config rules/ tests/` | `10/10: ✓ All tests passed` |
 | 2026-10-25 | 1.180.0 | `scripts/check-examples.sh` | 16/16 PASS |
+| 2026-10-25 | 1.180.0 | Both, after the Server Action async fix | 10/10 tests, 16/16 examples |
 
-Fixture totals: 38 `ruleid` and 44 `ok` annotations across 10 rule IDs.
+Fixture totals: 38 `ruleid` and 45 `ok` annotations across 10 rule IDs.
