@@ -154,8 +154,9 @@ Methodology: [docs/benchmark-methodology.md](docs/benchmark-methodology.md).
 First run (IdentityProvider, a NestJS identity provider with a Next.js SDK,
 2026-10-25): **8 findings, 0 true positives, 8 false positives – precision
 0%**, all from the two authorization heuristics. Seven were caused by a rule
-bug (non-async factories in a `'use server'` file) that has since been fixed
-with a regression test; one is the documented global-guard limitation.
+bug (non-async factories in a `'use server'` file), fixed with a regression
+test; a re-scan after the fix reported only the remaining one, the documented
+global-guard limitation.
 Recall is not reported. Details:
 [docs/benchmark-results.md](docs/benchmark-results.md).
 

@@ -24,7 +24,7 @@ publish the repository.
 | False-positive documentation | Done from development observations – [false-positives.md](../false-positives.md); benchmark observations pending |
 | Benchmark methodology | Done – [benchmark-methodology.md](../benchmark-methodology.md) |
 | Application scan (authorized) | Run 1 done on IdentityProvider (2026-10-25); permission basis and commit SHA still to be recorded |
-| Benchmark report | Run 1 recorded – [benchmark-results.md](../benchmark-results.md); re-scan after the rule fix pending |
+| Benchmark report | Runs 1 and 1b recorded – [benchmark-results.md](../benchmark-results.md) |
 | Public release | **Pending** |
 | Evidence of successful CI | Done – [run #3](https://github.com/Hemanth2709/SentinelRules/actions/runs/40168233347) on `main` |
 | Integration into portfolio application CI (W6) | **Pending** |
@@ -40,7 +40,7 @@ rules.
 |---|---|
 | Benchmark run 1 (IdentityProvider) | 8 findings, 0 TP, 8 FP, precision 0% |
 | Rule fix (Server Action async) | Regression fixture failed before, passes after; 10/10 tests, 16/16 examples |
-| Re-scan after fix | Pending (expected 1 finding) |
+| Re-scan after fix (run 1b) | 1 finding (the global-guard FP), as expected |
 
 ## Learning notes
 

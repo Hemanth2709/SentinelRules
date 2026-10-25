@@ -54,8 +54,34 @@ was not seen directly.
 | 2–8 | `sentinel-nextjs-handler-missing-auth-check` now treats only `export async function` in a `'use server'` module as a Server Action (Next.js only allows async exports there) | `createRemoveProjectAction` `ok` case in `tests/missing-authorization.ts`; reproduced as failing before the change, passing after |
 | 1 | None. Global guards in other files cannot be seen by a single-file rule. Projects that use a global guard should mark public routes with `@Public()` or disable this rule | – |
 
-**Expected effect:** a re-scan should report 1 finding (#1) instead of 8. This
-has **not yet been confirmed** by re-scanning the application.
+**Expected effect:** a re-scan should report 1 finding (#1) instead of 8.
+Confirmed by run 1b below.
+
+## Run 1b – IdentityProvider re-scan after the fix (2026-10-25)
+
+| Field | Value |
+|---|---|
+| Sentinel Rules commit | `3f21a43` (main, includes the Server Action fix) |
+| Semgrep version | 1.180.0 |
+| Scope | 160 git-tracked files, 141 TypeScript files scanned, ~100% parsed |
+| Commit scanned | _not yet recorded_ |
+
+The application's file count changed between runs (162/143 → 160/141), so
+the two runs were not on an identical commit of IdentityProvider.
+
+| # | Rule ID | Location | Class | Reason |
+|---|---|---|---|---|
+| 1 | `sentinel-nestjs-route-missing-guard` | `src/oauth/oauth.controller.ts` – `userinfo` | FP | Same as run 1 #1: global `APP_GUARD` |
+
+| | Run 1 | Run 1b |
+|---|---|---|
+| Findings | 8 | 1 |
+| TP | 0 | 0 |
+| FP | 8 | 1 |
+| Precision | 0% | 0% |
+
+The fix removed all 7 factory-function false positives. No true positives
+were found in either run, so precision remains 0%; recall is not reported.
 
 ### Other observation
 
