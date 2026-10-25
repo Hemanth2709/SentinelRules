@@ -27,6 +27,7 @@ file with each rule file.
 | `PUT` with `supabase.auth.getUser()` | no finding |
 | `GET` (excluded by design) | no finding |
 | `renameProject` Server Action with `getServerSession` | no finding |
+| `createRemoveProjectAction` – non-async factory returning an action | no finding |
 
 The `'use server'` directive sits in the middle of the fixture so that only
 the Server Action section follows it. In a real project it is the first
@@ -51,6 +52,7 @@ semgrep --test --config rules/ tests/
 |---|---|---|
 | 2026-10-25 | Validation error: `$PUBLIC` used in `metavariable-regex` but only bound in a `pattern-not`. | Listed `@Public()`, `@SkipAuth()`, `@AllowAnonymous()` as separate `pattern-not` entries. |
 | 2026-10-25 | Experiment showed `pattern-not: function $M(...) {...}` does not remove `export async function` matches. | Wrote all negations in the `export function` form. |
+| 2026-10-25 | Benchmark scan flagged 7 non-async factory functions in a `'use server'` file. A first regression fixture whose inner function called `getServerSession` passed even before the fix, because the negation matches nested calls, so it did not reproduce the bug. | Rewrote the fixture to use an unrecognised helper (`getAccessToken`), confirmed it failed, then required `export async function` for the Server Action branch. |
 
 ## Cross-rule observation
 

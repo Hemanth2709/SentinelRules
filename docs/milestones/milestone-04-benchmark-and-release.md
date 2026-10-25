@@ -23,10 +23,10 @@ publish the repository.
 | Vulnerable and secure examples | Done – `examples/` |
 | False-positive documentation | Done from development observations – [false-positives.md](../false-positives.md); benchmark observations pending |
 | Benchmark methodology | Done – [benchmark-methodology.md](../benchmark-methodology.md) |
-| Application scan (authorized) | **Pending** – no application selected yet |
-| Benchmark report | **Pending** – [benchmark-results.md](../benchmark-results.md) is a template |
+| Application scan (authorized) | Run 1 done on IdentityProvider (2026-10-25); permission basis and commit SHA still to be recorded |
+| Benchmark report | Run 1 recorded – [benchmark-results.md](../benchmark-results.md); re-scan after the rule fix pending |
 | Public release | **Pending** |
-| Evidence of successful CI | **Pending** |
+| Evidence of successful CI | Done – [run #3](https://github.com/Hemanth2709/SentinelRules/actions/runs/40168233347) on `main` |
 | Integration into portfolio application CI (W6) | **Pending** |
 
 ## Implementation record
@@ -36,11 +36,16 @@ rules.
 
 ## Testing and validation
 
-Not yet applicable: the benchmark has not been run.
+| Step | Result |
+|---|---|
+| Benchmark run 1 (IdentityProvider) | 8 findings, 0 TP, 8 FP, precision 0% |
+| Rule fix (Server Action async) | Regression fixture failed before, passes after; 10/10 tests, 16/16 examples |
+| Re-scan after fix | Pending (expected 1 finding) |
 
 ## Learning notes
 
-To be written after the benchmark.
+See the benchmark section of
+[lessons-learned.md](../learning-notes/lessons-learned.md).
 
 ## Decisions
 
@@ -48,8 +53,9 @@ None yet.
 
 ## Known limitations
 
-The pack has not been evaluated on a real application; precision and recall
-are unknown.
+Only one application has been scanned, and only the authorization rules
+produced findings, so the other eight rule IDs have no real-world precision
+data. Recall is unknown.
 
 ## Completion review
 

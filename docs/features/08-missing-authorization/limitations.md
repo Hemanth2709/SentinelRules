@@ -4,7 +4,8 @@
 
 - Routes protected by a **global guard** (`APP_GUARD`,
   `app.useGlobalGuards`) registered in another file. This is the largest
-  expected source of false positives; projects using global guards should
+  expected source of false positives (observed in the IdentityProvider
+  benchmark, see [benchmark-results.md](../../benchmark-results.md)); projects using global guards should
   mark public routes with `@Public()` (which the rule honours) or disable this
   rule.
 - Intentionally public endpoints not marked with a recognised decorator:

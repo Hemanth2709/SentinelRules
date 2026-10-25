@@ -13,6 +13,7 @@ declare const RolesGuard: any;
 declare const authOptions: any;
 declare const db: any;
 declare const supabase: any;
+declare function getAccessToken(): Promise<string | undefined>;
 const Public = () => SetMetadata('isPublic', true);
 
 // ---------------------------------------------------------------------------
@@ -126,4 +127,20 @@ export async function renameProject(projectId: string, name: string) {
   const session = await getServerSession(authOptions);
   if (!session) throw new Error('Unauthorized');
   await db.project.update({ where: { id: projectId, ownerId: session.user.id }, data: { name } });
+}
+
+// A non-async factory that returns a Server Action. Next.js only allows async
+// exports in a 'use server' file, so the factory itself is not an action.
+// Regression case from the IdentityProvider benchmark scan (2026-10-25).
+// ok: sentinel-nextjs-handler-missing-auth-check
+export function createRemoveProjectAction(config: { apiUrl: string }) {
+  return async function removeProjectAction(projectId: string) {
+    const accessToken = await getAccessToken();
+    if (!accessToken) return { error: 'Not authenticated' };
+    await fetch(`${config.apiUrl}/projects/${projectId}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    return { success: true };
+  };
 }
