@@ -23,7 +23,7 @@ Fixture: [`tests/unsafe-html.tsx`](../../../tests/unsafe-html.tsx)
 
 ```bash
 semgrep --test --config rules/unsafe-html.yml tests/unsafe-html.tsx
-semgrep --test --config rules/ tests/
+scripts/run-tests.sh
 ```
 
 ## Results

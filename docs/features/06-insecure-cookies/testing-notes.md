@@ -25,7 +25,7 @@ Fixture: [`tests/insecure-cookies.ts`](../../../tests/insecure-cookies.ts)
 
 ```bash
 semgrep --test --config rules/insecure-cookies.yml tests/insecure-cookies.ts
-semgrep --test --config rules/ tests/
+scripts/run-tests.sh
 ```
 
 ## Results

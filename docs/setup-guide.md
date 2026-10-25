@@ -20,9 +20,28 @@ semgrep --version   # 1.180.0
 ## Run the rule tests
 
 ```bash
-semgrep --test --config rules/ tests/
+scripts/run-tests.sh
 scripts/check-examples.sh
 ```
+
+## Windows (Git Bash)
+
+Semgrep's native Windows support is in beta. Tested setup: Git Bash,
+Python 3.14, `python -m pip install semgrep==1.180.0`.
+
+- pip may install `semgrep` into a `Scripts` folder that is not on `PATH`
+  (`bash: semgrep: command not found`). Add it, quoting paths with spaces:
+  ```bash
+  export PATH="$PATH:$(cygpath -u "$(python -c 'import sysconfig; print(sysconfig.get_path("scripts"))')")"
+  ```
+  For a `--user` install the folder is
+  `%APPDATA%\Python\Python3XX\Scripts`.
+- Set `export PYTHONUTF8=1` to avoid encoding errors.
+- Use `/e/path/to/app`, not `E:\path\to\app`: Git Bash removes backslashes.
+- Use `scripts/run-tests.sh`, not `semgrep --test --config rules/ tests/`
+  (see [testing-guide.md](testing-guide.md#windows-permissionerror--semgrepsettingsyml)).
+
+Docker (`semgrep/semgrep:1.180.0`) or WSL avoid these issues entirely.
 
 ## Scan an application
 

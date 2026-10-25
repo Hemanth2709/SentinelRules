@@ -25,7 +25,7 @@ Fixture: [`tests/next-public-secrets.ts`](../../../tests/next-public-secrets.ts)
 
 ```bash
 semgrep --test --config rules/next-public-secrets.yml tests/next-public-secrets.ts
-semgrep --test --config rules/ tests/
+scripts/run-tests.sh
 ```
 
 ## Results

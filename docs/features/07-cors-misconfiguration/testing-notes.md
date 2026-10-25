@@ -24,7 +24,7 @@ Fixture: [`tests/cors-misconfiguration.ts`](../../../tests/cors-misconfiguration
 
 ```bash
 semgrep --test --config rules/cors-misconfiguration.yml tests/cors-misconfiguration.ts
-semgrep --test --config rules/ tests/
+scripts/run-tests.sh
 ```
 
 ## Results

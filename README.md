@@ -79,12 +79,15 @@ semgrep scan --metrics=off --config rules/ --sarif --output sentinel.sarif /path
 ## Testing
 
 ```bash
-semgrep --test --config rules/ tests/   # annotated fixtures
-scripts/check-examples.sh               # vulnerable vs secure examples
+scripts/run-tests.sh        # annotated fixtures, one rule file at a time
+scripts/check-examples.sh   # vulnerable vs secure examples
 ```
 
-Note: `semgrep --test rules/` on its own finds no fixtures in this layout and
-exits 0; use the command above ([DEC-003](docs/decisions/decision-log.md)).
+Both scripts work on Linux, macOS and Windows (Git Bash). Avoid
+`semgrep --test --config rules/ tests/` on Windows: it can skip rule files
+with a `PermissionError` while still reporting a pass. `semgrep --test rules/`
+finds no fixtures in this layout and exits 0
+([DEC-003](docs/decisions/decision-log.md)).
 Details: [docs/testing-guide.md](docs/testing-guide.md).
 
 ## CI/CD

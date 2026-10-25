@@ -7,6 +7,11 @@ All notable changes are recorded here. The format follows
 
 ### Fixed
 
+- Tests could silently skip rule files on Windows (`PermissionError` on
+  `~/.semgrep/settings.yml`). New `scripts/run-tests.sh` runs one rule file
+  at a time with a private settings file; CI and docs use it.
+- `scripts/check-examples.sh` now works where only `python` (not `python3`)
+  is installed, as in Git Bash on Windows.
 - `sentinel-nextjs-handler-missing-auth-check` no longer treats non-async
   exports in a `'use server'` module as Server Actions (7 false positives in
   benchmark run 1).

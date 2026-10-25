@@ -25,7 +25,7 @@ Fixture: [`tests/validation-pipe.ts`](../../../tests/validation-pipe.ts)
 
 ```bash
 semgrep --test --config rules/validation-pipe.yml tests/validation-pipe.ts
-semgrep --test --config rules/ tests/
+scripts/run-tests.sh
 ```
 
 ## Results

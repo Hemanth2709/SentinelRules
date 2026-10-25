@@ -35,17 +35,12 @@ jobs:
         run: semgrep --metrics=off --validate --config rules/
 
       - name: Run rule tests
-        # Rules live in rules/ and fixtures in tests/, so the config and the
-        # target are passed separately. `semgrep --test rules/` on its own
-        # finds no fixtures and exits 0, so the output is also checked for
-        # that case below.
+        # One rule file at a time, the same script contributors run locally.
+        # It fails on a missing fixture, a Semgrep error, or "No unit tests
+        # found" as well as on a failing annotation.
         run: |
           set -o pipefail
-          semgrep --metrics=off --test --config rules/ tests/ 2>&1 | tee semgrep-test-output.txt
-          if grep -q "No unit tests found" semgrep-test-output.txt; then
-            echo "::error::semgrep --test found no fixtures"
-            exit 1
-          fi
+          scripts/run-tests.sh | tee semgrep-test-output.txt
 
       - name: Check vulnerable and secure examples
         run: |
@@ -58,7 +53,7 @@ jobs:
           {
             echo "## Semgrep ${SEMGREP_VERSION} rule tests"
             echo '```'
-            grep -E "tests? (did not )?pass|✓|✖|missed lines" semgrep-test-output.txt || true
+            cat semgrep-test-output.txt 2>/dev/null || echo "not run"
             echo '```'
             echo "## Examples"
             echo '```'

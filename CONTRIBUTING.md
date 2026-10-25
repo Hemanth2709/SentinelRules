@@ -21,7 +21,7 @@ scope described in [docs/project-overview.md](docs/project-overview.md).
 5. Run:
    ```bash
    semgrep --validate --config rules/
-   semgrep --test --config rules/ tests/
+   scripts/run-tests.sh
    scripts/check-examples.sh
    ```
 6. Update the feature's `testing-notes.md`, `limitations.md`, and
