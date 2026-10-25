@@ -1,0 +1,101 @@
+rules:
+  - id: sentinel-jwt-ignore-expiration
+    languages:
+      - typescript
+      - javascript
+    severity: ERROR
+    message: >-
+      JWT verification is configured with `ignoreExpiration: true`. Expired
+      tokens will still be accepted, so a leaked or revoked token remains
+      usable indefinitely. Remove the option (expiration is enforced by
+      default) and keep token lifetimes short.
+    metadata:
+      category: security
+      subcategory:
+        - vuln
+      confidence: HIGH
+      likelihood: MEDIUM
+      impact: HIGH
+      technology:
+        - nodejs
+        - nestjs
+        - jsonwebtoken
+        - passport-jwt
+      cwe:
+        - "CWE-613: Insufficient Session Expiration"
+      owasp:
+        - "A07:2021 - Identification and Authentication Failures"
+      references:
+        - https://github.com/auth0/node-jsonwebtoken#jwtverifytoken-secretorpublickey-options-callback
+        - https://github.com/mikenicholson/passport-jwt#configure-strategy
+        - https://docs.nestjs.com/security/authentication#jwt-functionality
+        - https://cheatsheetseries.owasp.org/cheatsheets/JSON_Web_Token_for_Java_Cheat_Sheet.html
+      documentation: docs/features/02-jwt-misconfiguration/README.md
+    # `ignoreExpiration` is specific to JWT libraries (jsonwebtoken,
+    # passport-jwt, @nestjs/jwt verifyOptions), so any object literal that
+    # sets it to `true` is reported.
+    patterns:
+      - pattern: "{..., ignoreExpiration: $VALUE, ...}"
+      - metavariable-pattern:
+          metavariable: $VALUE
+          pattern: "true"
+      # Report on the value so the finding points at the offending property.
+      - focus-metavariable: $VALUE
+
+  - id: sentinel-jwt-verify-missing-algorithms
+    languages:
+      - typescript
+      - javascript
+    severity: WARNING
+    message: >-
+      `$J.verify()` from 'jsonwebtoken' is called without an explicit
+      `algorithms` allowlist in its options. When the key can be interpreted
+      by more than one algorithm family, the token header decides how it is
+      verified. Pin the expected algorithm(s), e.g.
+      `{ algorithms: ['RS256'] }`. Review manually: a wrapper or older/newer
+      library default may already restrict algorithms.
+    metadata:
+      category: security
+      subcategory:
+        - audit
+      confidence: LOW
+      likelihood: LOW
+      impact: HIGH
+      technology:
+        - nodejs
+        - jsonwebtoken
+      cwe:
+        - "CWE-347: Improper Verification of Cryptographic Signature"
+      owasp:
+        - "A02:2021 - Cryptographic Failures"
+        - "A07:2021 - Identification and Authentication Failures"
+      references:
+        - https://github.com/auth0/node-jsonwebtoken#jwtverifytoken-secretorpublickey-options-callback
+        - https://github.com/auth0/node-jsonwebtoken/wiki/Migration-Notes:-v8-to-v9
+        - https://datatracker.ietf.org/doc/html/rfc8725#section-3.1
+      documentation: docs/features/02-jwt-misconfiguration/README.md
+    patterns:
+      # Restrict to the jsonwebtoken module so that unrelated `.verify()`
+      # methods (crypto, NestJS JwtService, bcrypt wrappers) are not matched.
+      - pattern-either:
+          - pattern-inside: |
+              import $J from 'jsonwebtoken';
+              ...
+          - pattern-inside: |
+              import * as $J from 'jsonwebtoken';
+              ...
+          - pattern-inside: |
+              $J = require('jsonwebtoken');
+              ...
+      - pattern-either:
+          # No options argument at all.
+          - pattern: $J.verify($TOKEN, $KEY)
+          # Callback form without options.
+          - pattern: $J.verify($TOKEN, $KEY, function (...) { ... })
+          - pattern: $J.verify($TOKEN, $KEY, (...) => $BODY)
+          # Inline options object that lacks `algorithms`.
+          - patterns:
+              - pattern: $J.verify($TOKEN, $KEY, {...}, ...)
+              - pattern-not: "$J.verify($TOKEN, $KEY, {..., algorithms: $ALGS, ...}, ...)"
+              # A spread may supply algorithms from shared options; not inspectable.
+              - pattern-not: "$J.verify($TOKEN, $KEY, {..., ...$SPREAD, ...}, ...)"
