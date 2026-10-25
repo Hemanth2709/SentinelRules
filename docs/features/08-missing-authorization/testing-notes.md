@@ -37,7 +37,7 @@ statement of the file; the fixture comments explain this.
 
 ```bash
 semgrep --test --config rules/missing-authorization.yml tests/missing-authorization.ts
-semgrep --test --config rules/ tests/
+scripts/run-tests.sh
 ```
 
 ## Results

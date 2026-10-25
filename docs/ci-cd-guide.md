@@ -12,7 +12,8 @@ Workflow: [`.github/workflows/semgrep-tests.yml`](../.github/workflows/semgrep-t
 2. Set up Python 3.12.
 3. Install `semgrep==${SEMGREP_VERSION}` (currently 1.180.0).
 4. `semgrep --validate --config rules/`.
-5. `semgrep --test --config rules/ tests/`, failing if Semgrep reports
+5. `scripts/run-tests.sh`: fixture tests one rule file at a time, failing on a
+   failed annotation, a missing fixture, a Semgrep error, or
    `No unit tests found`.
 6. `scripts/check-examples.sh`.
 7. Write a summary of test and example results to the job summary

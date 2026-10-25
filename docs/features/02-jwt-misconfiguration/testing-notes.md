@@ -29,7 +29,7 @@ Fixture: [`tests/jwt-misconfiguration.ts`](../../../tests/jwt-misconfiguration.t
 
 ```bash
 semgrep --test --config rules/jwt-misconfiguration.yml tests/jwt-misconfiguration.ts
-semgrep --test --config rules/ tests/
+scripts/run-tests.sh
 ```
 
 ## Results

@@ -30,7 +30,7 @@ Fixture: [`tests/sql-injection.ts`](../../../tests/sql-injection.ts)
 
 ```bash
 semgrep --test --config rules/sql-injection.yml tests/sql-injection.ts
-semgrep --test --config rules/ tests/
+scripts/run-tests.sh
 scripts/check-examples.sh
 ```
 

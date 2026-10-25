@@ -54,6 +54,30 @@
 - **Consequences:** Documentation uses the two-directory command throughout.
 - **Related:** all rules, CI.
 
+### DEC-007: Run fixture tests one rule file at a time
+
+- **Status:** Accepted
+- **Date:** 2026-10-25
+- **Context:** On Windows (Git Bash, Python 3.14, Semgrep 1.180.0),
+  `semgrep --test --config rules/ tests/` raised
+  `PermissionError: ... .semgrep\settings.yml` for three rule files and still
+  printed "All tests passed" for the other six rule IDs. Semgrep rewrites its
+  settings file on every start, and the test runner checks rule files
+  concurrently. `check-examples.sh` also called `python3`, which Git Bash on
+  Windows usually lacks.
+- **Decision:** Add `scripts/run-tests.sh`, which runs each rule file in its
+  own Semgrep process with a private `SEMGREP_SETTINGS_FILE`, and fails on
+  any failed annotation, missing fixture, Semgrep error, or empty test run.
+  Use it in CI and the docs. Make both scripts use `python3` or `python`.
+- **Alternatives considered:** Telling Windows users to use Docker or WSL
+  (still documented, but the default command should work); keeping the
+  single-call command in CI (it is fine on Linux, but the local and CI
+  commands would differ).
+- **Consequences:** Slightly slower (one Semgrep start per rule file). The
+  Windows fix was verified by the maintainer's report of the failure; the
+  sequential script itself was tested on Linux only.
+- **Related:** DEC-003, CI.
+
 ### DEC-004: One rule file per feature; multiple rule IDs allowed
 
 - **Status:** Accepted
