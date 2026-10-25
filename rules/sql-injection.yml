@@ -1,0 +1,70 @@
+rules:
+  - id: sentinel-sql-injection-raw-query
+    languages:
+      - typescript
+      - javascript
+    severity: ERROR
+    message: >-
+      SQL text passed to the raw-query API '$METHOD' is built with string
+      interpolation or concatenation. If any interpolated value is influenced
+      by a user, it can change the structure of the query (SQL injection).
+      Pass values as bound parameters instead: Prisma's tagged-template
+      queryRaw API, a numbered or `?` placeholder with a separate values
+      array, or knex.raw('... ?', [value]).
+    metadata:
+      category: security
+      subcategory:
+        - vuln
+      confidence: MEDIUM
+      likelihood: MEDIUM
+      impact: HIGH
+      technology:
+        - nodejs
+        - nestjs
+        - prisma
+        - typeorm
+        - knex
+        - node-postgres
+        - mysql
+      cwe:
+        - "CWE-89: Improper Neutralization of Special Elements used in an SQL Command ('SQL Injection')"
+      owasp:
+        - "A03:2021 - Injection"
+      references:
+        - https://www.prisma.io/docs/orm/prisma-client/using-raw-sql/raw-queries
+        - https://knexjs.org/guide/raw.html
+        - https://node-postgres.com/features/queries#parameterized-query
+        - https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html
+      documentation: docs/features/01-sql-injection/README.md
+    patterns:
+      - pattern-either:
+          # 1. The SQL string is written directly in the call.
+          - pattern: $DB.$METHOD($SQLSTR, ...)
+          # 2. The SQL string is built in a variable earlier in the same
+          #    scope and that variable is passed to the call.
+          - patterns:
+              - pattern-either:
+                  - pattern-inside: |
+                      $SQLVAR = $SQLSTR;
+                      ...
+                  - pattern-inside: |
+                      $SQLVAR += $SQLSTR;
+                      ...
+              - pattern: $DB.$METHOD($SQLVAR, ...)
+      - metavariable-regex:
+          metavariable: $METHOD
+          regex: ^(\$queryRawUnsafe|\$executeRawUnsafe|query|raw|execute)$
+      # The SQL text must be dynamic: a template literal with at least one
+      # interpolation, a concatenation, or a .concat() call.
+      - metavariable-pattern:
+          metavariable: $SQLSTR
+          pattern-either:
+            - pattern: "`...${$E}...`"
+            - pattern: $A + $B
+            - pattern: $S.concat(...)
+      # The string must look like SQL. This keeps generic `.query()`,
+      # `.raw()` and `.execute()` methods (GraphQL clients, HTTP helpers)
+      # out of scope.
+      - metavariable-regex:
+          metavariable: $SQLSTR
+          regex: (?is).*\b(select\s.+\sfrom|insert\s+into|update\s.+\sset|delete\s+from|where\s|order\s+by|group\s+by|and\s+\w+\s*(=|like|in)|values\s*\()

@@ -1,0 +1,16 @@
+# Python / Semgrep
+.venv/
+__pycache__/
+.semgrep/
+.semgrep_logs/
+
+# Scan output
+*.sarif
+findings.json
+semgrep-test-output.txt
+examples-output.txt
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store

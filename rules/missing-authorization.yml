@@ -1,0 +1,128 @@
+rules:
+  - id: sentinel-nestjs-route-missing-guard
+    languages:
+      - typescript
+    severity: WARNING
+    message: >-
+      The NestJS route handler '$HANDLER' in controller '$CONTROLLER' has no
+      visible `@UseGuards(...)` on the method or the controller, and is not
+      marked public. Unless a global guard (APP_GUARD or
+      app.useGlobalGuards) or another control protects it, any caller can
+      reach it. This is a candidate for review, not proof of a missing
+      check: confirm how this route is protected and that it verifies access
+      to the specific resource, not just that the user is signed in.
+    metadata:
+      category: security
+      subcategory:
+        - audit
+      confidence: LOW
+      likelihood: MEDIUM
+      impact: HIGH
+      technology:
+        - nestjs
+      cwe:
+        - "CWE-862: Missing Authorization"
+      owasp:
+        - "A01:2021 - Broken Access Control"
+      references:
+        - https://docs.nestjs.com/guards
+        - https://docs.nestjs.com/security/authentication#enable-authentication-globally
+        - https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html
+      documentation: docs/features/08-missing-authorization/README.md
+    patterns:
+      - pattern-inside: |
+          @Controller(...)
+          class $CONTROLLER { ... }
+      # Controller-level protection or an explicit public marker.
+      - pattern-not-inside: |
+          @UseGuards(...)
+          class $CONTROLLER { ... }
+      - pattern-not-inside: |
+          @Public()
+          class $CONTROLLER { ... }
+      - pattern: |
+          @$ROUTE(...)
+          $HANDLER(...) { ... }
+      - metavariable-regex:
+          metavariable: $ROUTE
+          regex: ^(Get|Post|Put|Patch|Delete|All|Options|Head)$
+      # Method-level protection or an explicit public marker.
+      - pattern-not: |
+          @UseGuards(...)
+          $HANDLER(...) { ... }
+      - pattern-not: |
+          @Public()
+          $HANDLER(...) { ... }
+      - pattern-not: |
+          @SkipAuth()
+          $HANDLER(...) { ... }
+      - pattern-not: |
+          @AllowAnonymous()
+          $HANDLER(...) { ... }
+      - focus-metavariable: $HANDLER
+
+  - id: sentinel-nextjs-handler-missing-auth-check
+    languages:
+      - typescript
+      - javascript
+    severity: WARNING
+    message: >-
+      The exported Next.js handler '$HANDLER' does not call a recognised
+      session or authentication helper (for example getServerSession, auth,
+      getToken, currentUser, supabase.auth.getUser). Unless middleware or a
+      wrapper protects it, any caller can invoke it. This is a candidate for
+      review, not proof of a missing check: confirm that the handler both
+      authenticates the caller and verifies access to the specific resource.
+    metadata:
+      category: security
+      subcategory:
+        - audit
+      confidence: LOW
+      likelihood: MEDIUM
+      impact: HIGH
+      technology:
+        - nextjs
+      cwe:
+        - "CWE-862: Missing Authorization"
+        - "CWE-306: Missing Authentication for Critical Function"
+      owasp:
+        - "A01:2021 - Broken Access Control"
+        - "A07:2021 - Identification and Authentication Failures"
+      references:
+        - https://nextjs.org/docs/app/guides/authentication
+        - https://nextjs.org/docs/app/guides/data-security
+        - https://nextjs.org/docs/app/building-your-application/routing/route-handlers
+      documentation: docs/features/08-missing-authorization/README.md
+    patterns:
+      - pattern-either:
+          # App Router route handlers (app/**/route.ts). Only state-changing
+          # methods are reported by default; GET handlers are often public.
+          - patterns:
+              - pattern: export function $HANDLER(...) { ... }
+              - metavariable-regex:
+                  metavariable: $HANDLER
+                  regex: ^(POST|PUT|PATCH|DELETE)$
+          # Exported functions in a 'use server' module are Server Actions,
+          # which are reachable as POST endpoints.
+          - patterns:
+              - pattern-either:
+                  - pattern-inside: |
+                      'use server';
+                      ...
+                  - pattern-inside: |
+                      "use server";
+                      ...
+              - pattern: export function $HANDLER(...) { ... }
+      - pattern-not: export function $HANDLER(...) { ... getServerSession(...); ... }
+      - pattern-not: export function $HANDLER(...) { ... auth(...); ... }
+      - pattern-not: export function $HANDLER(...) { ... getSession(...); ... }
+      - pattern-not: export function $HANDLER(...) { ... getToken(...); ... }
+      - pattern-not: export function $HANDLER(...) { ... currentUser(...); ... }
+      - pattern-not: export function $HANDLER(...) { ... getAuth(...); ... }
+      - pattern-not: export function $HANDLER(...) { ... verifySession(...); ... }
+      - pattern-not: export function $HANDLER(...) { ... requireAuth(...); ... }
+      - pattern-not: export function $HANDLER(...) { ... requireUser(...); ... }
+      - pattern-not: export function $HANDLER(...) { ... requireSession(...); ... }
+      - pattern-not: export function $HANDLER(...) { ... $CLIENT.auth.getUser(...); ... }
+      - pattern-not: export function $HANDLER(...) { ... $CLIENT.auth.getSession(...); ... }
+      - focus-metavariable: $HANDLER

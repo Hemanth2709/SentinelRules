@@ -1,0 +1,64 @@
+rules:
+  - id: sentinel-cors-credentials-any-origin
+    languages:
+      - typescript
+      - javascript
+    severity: ERROR
+    message: >-
+      CORS is configured to allow credentials while accepting any requesting
+      origin (`origin: true`, an origin callback that always allows, or a
+      reflected Origin header). Any website a signed-in user visits can then
+      make authenticated requests and read the responses. Use an explicit
+      allowlist of trusted origins and compare the request origin against it.
+    metadata:
+      category: security
+      subcategory:
+        - vuln
+      confidence: HIGH
+      likelihood: MEDIUM
+      impact: HIGH
+      technology:
+        - nodejs
+        - express
+        - nestjs
+        - cors
+      cwe:
+        - "CWE-942: Permissive Cross-domain Policy with Untrusted Domains"
+        - "CWE-346: Origin Validation Error"
+      owasp:
+        - "A05:2021 - Security Misconfiguration"
+        - "A01:2021 - Broken Access Control"
+      references:
+        - https://docs.nestjs.com/security/cors
+        - https://github.com/expressjs/cors#configuration-options
+        - https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS#requests_with_credentials
+        - https://portswigger.net/web-security/cors
+      documentation: docs/features/07-cors-misconfiguration/README.md
+    pattern-either:
+      # Options object for app.enableCors(), cors(), or NestFactory.create(..., { cors })
+      # `origin: true` makes the cors package reflect the request's Origin.
+      - pattern: "{..., origin: true, ..., credentials: true, ...}"
+      # Origin callback that allows every origin.
+      - pattern: "{..., origin: ($ORIGIN, $CB) => $CB(null, true), ..., credentials: true, ...}"
+      - pattern: "{..., origin: ($ORIGIN, $CB) => { ... $CB(null, true); }, ..., credentials: true, ...}"
+      - pattern: "{..., origin: function ($ORIGIN, $CB) { ... $CB(null, true); }, ..., credentials: true, ...}"
+      # Origin callback that echoes back whatever origin was sent.
+      - pattern: "{..., origin: ($ORIGIN, $CB) => $CB(null, $ORIGIN), ..., credentials: true, ...}"
+      # Manual headers: reflect the request Origin and allow credentials.
+      - patterns:
+          - pattern-either:
+              - pattern: |
+                  $RES.$SET("Access-Control-Allow-Origin", $REQ.headers.origin);
+                  ...
+                  $RES.$SET("Access-Control-Allow-Credentials", "true");
+              - pattern: |
+                  $RES.$SET("Access-Control-Allow-Credentials", "true");
+                  ...
+                  $RES.$SET("Access-Control-Allow-Origin", $REQ.headers.origin);
+              - pattern: |
+                  $RES.$SET("Access-Control-Allow-Origin", $REQ.header("origin"));
+                  ...
+                  $RES.$SET("Access-Control-Allow-Credentials", "true");
+          - metavariable-regex:
+              metavariable: $SET
+              regex: ^(setHeader|header|set)$
