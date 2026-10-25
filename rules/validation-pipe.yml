@@ -1,0 +1,43 @@
+rules:
+  - id: sentinel-nestjs-validation-pipe-missing-whitelist
+    languages:
+      - typescript
+      - javascript
+    severity: WARNING
+    message: >-
+      This NestJS ValidationPipe is configured without `whitelist: true`.
+      Properties that have no validation decorator on the DTO are passed
+      through to the handler unchanged, which can enable mass assignment
+      (e.g. a client setting `role` or `isAdmin`). Set `whitelist: true`
+      (and consider `forbidNonWhitelisted: true`). Note that whitelisting
+      strips undecorated properties; it does not validate the decorated ones.
+    metadata:
+      category: security
+      subcategory:
+        - audit
+      confidence: MEDIUM
+      likelihood: MEDIUM
+      impact: MEDIUM
+      technology:
+        - nestjs
+        - class-validator
+      cwe:
+        - "CWE-915: Improperly Controlled Modification of Dynamically-Determined Object Attributes"
+      owasp:
+        - "A08:2021 - Software and Data Integrity Failures"
+        - "A04:2021 - Insecure Design"
+      references:
+        - https://docs.nestjs.com/techniques/validation#stripping-properties
+        - https://cheatsheetseries.owasp.org/cheatsheets/Mass_Assignment_Cheat_Sheet.html
+      documentation: docs/features/03-validation-pipe/README.md
+    pattern-either:
+      # Default options: whitelist is false.
+      - pattern: new ValidationPipe()
+      # Registered as a class, so Nest instantiates it with default options.
+      - pattern: "{..., provide: APP_PIPE, ..., useClass: ValidationPipe, ...}"
+      # Inline options object that does not set whitelist to true.
+      - patterns:
+          - pattern: new ValidationPipe({...})
+          - pattern-not: "new ValidationPipe({..., whitelist: true, ...})"
+          # A spread may supply whitelist from shared options; not inspectable.
+          - pattern-not: "new ValidationPipe({..., ...$SPREAD, ...})"

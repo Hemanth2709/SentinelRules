@@ -1,0 +1,61 @@
+rules:
+  - id: sentinel-react-dangerously-set-inner-html
+    languages:
+      - typescript
+      - javascript
+    severity: WARNING
+    message: >-
+      `dangerouslySetInnerHTML` is given a dynamic value that is not passed
+      through a recognised HTML sanitizer. If any part of this HTML can be
+      influenced by a user (CMS content, query parameters, database fields,
+      Markdown output), it can execute script in the visitor's browser
+      (XSS). Prefer rendering text through JSX; if HTML is required,
+      sanitize it with a maintained sanitizer such as DOMPurify, and confirm
+      where the data comes from.
+    metadata:
+      category: security
+      subcategory:
+        - audit
+      confidence: LOW
+      likelihood: MEDIUM
+      impact: HIGH
+      technology:
+        - react
+        - nextjs
+      cwe:
+        - "CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')"
+      owasp:
+        - "A03:2021 - Injection"
+      references:
+        - https://react.dev/reference/react-dom/components/common#dangerously-setting-the-inner-html
+        - https://github.com/cure53/DOMPurify
+        - https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html
+      documentation: docs/features/05-unsafe-html/README.md
+    patterns:
+      # Matches the `{ __html: ... }` object whether it is written inside JSX
+      # (dangerouslySetInnerHTML={{ __html: x }}) or passed to
+      # React.createElement.
+      - pattern: "{__html: $HTML}"
+      # Static strings are not attacker-controlled.
+      - pattern-not: "{__html: '...'}"
+      - metavariable-pattern:
+          metavariable: $HTML
+          patterns:
+            - pattern-not: "`...`"
+            - pattern: $X
+      # Value sanitized inline.
+      - pattern-not: "{__html: DOMPurify.sanitize(...)}"
+      - pattern-not: "{__html: $PURIFY.sanitize(...)}"
+      - pattern-not: "{__html: sanitizeHtml(...)}"
+      - pattern-not: "{__html: sanitize(...)}"
+      # Value sanitized into a variable earlier in the same scope.
+      - pattern-not-inside: |
+          $HTML = $PURIFY.sanitize(...);
+          ...
+      - pattern-not-inside: |
+          $HTML = sanitizeHtml(...);
+          ...
+      - pattern-not-inside: |
+          $HTML = sanitize(...);
+          ...
+      - focus-metavariable: $HTML

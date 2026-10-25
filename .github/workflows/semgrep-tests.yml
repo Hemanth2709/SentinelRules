@@ -1,0 +1,67 @@
+name: Semgrep rule tests
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  # Keep in sync with docs/setup-guide.md.
+  SEMGREP_VERSION: "1.180.0"
+
+jobs:
+  rule-tests:
+    name: Validate and test rule pack
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Semgrep ${{ env.SEMGREP_VERSION }}
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install "semgrep==${SEMGREP_VERSION}"
+          semgrep --version
+
+      - name: Validate rule syntax
+        run: semgrep --metrics=off --validate --config rules/
+
+      - name: Run rule tests
+        # Rules live in rules/ and fixtures in tests/, so the config and the
+        # target are passed separately. `semgrep --test rules/` on its own
+        # finds no fixtures and exits 0, so the output is also checked for
+        # that case below.
+        run: |
+          set -o pipefail
+          semgrep --metrics=off --test --config rules/ tests/ 2>&1 | tee semgrep-test-output.txt
+          if grep -q "No unit tests found" semgrep-test-output.txt; then
+            echo "::error::semgrep --test found no fixtures"
+            exit 1
+          fi
+
+      - name: Check vulnerable and secure examples
+        run: |
+          set -o pipefail
+          scripts/check-examples.sh | tee examples-output.txt
+
+      - name: Publish summary
+        if: always()
+        run: |
+          {
+            echo "## Semgrep ${SEMGREP_VERSION} rule tests"
+            echo '```'
+            grep -E "tests? (did not )?pass|✓|✖|missed lines" semgrep-test-output.txt || true
+            echo '```'
+            echo "## Examples"
+            echo '```'
+            cat examples-output.txt 2>/dev/null || echo "not run"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"

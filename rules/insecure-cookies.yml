@@ -1,0 +1,63 @@
+rules:
+  - id: sentinel-insecure-session-cookie
+    languages:
+      - typescript
+      - javascript
+    severity: WARNING
+    message: >-
+      The cookie $NAME looks like a session or authentication cookie but is
+      set without all of `httpOnly: true`, `secure` (not false) and an
+      explicit `sameSite`. Missing HttpOnly lets injected script read the
+      token; missing Secure allows it over plain HTTP; missing SameSite
+      leaves the decision to browser defaults. Set these attributes to
+      match your authentication model and deployment.
+    metadata:
+      category: security
+      subcategory:
+        - audit
+      confidence: MEDIUM
+      likelihood: MEDIUM
+      impact: MEDIUM
+      technology:
+        - nodejs
+        - express
+        - nestjs
+        - nextjs
+      cwe:
+        - "CWE-1004: Sensitive Cookie Without 'HttpOnly' Flag"
+        - "CWE-614: Sensitive Cookie in HTTPS Session Without 'Secure' Attribute"
+        - "CWE-1275: Sensitive Cookie with Improper SameSite Attribute"
+      owasp:
+        - "A05:2021 - Security Misconfiguration"
+        - "A07:2021 - Identification and Authentication Failures"
+      references:
+        - https://expressjs.com/en/api.html#res.cookie
+        - https://nextjs.org/docs/app/api-reference/functions/cookies
+        - https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies#restrict_access_to_cookies
+        - https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html#cookies
+      documentation: docs/features/06-insecure-cookies/README.md
+    patterns:
+      - pattern-either:
+          # Express / NestJS (@Res() response): res.cookie(name, value, options?)
+          - pattern: $RES.cookie($NAME, $VALUE)
+          - pattern: $RES.cookie($NAME, $VALUE, {...})
+          # Next.js App Router: cookies().set(name, value, options?)
+          - pattern: cookies().set($NAME, $VALUE)
+          - pattern: cookies().set($NAME, $VALUE, {...})
+          - pattern: (await cookies()).set($NAME, $VALUE)
+          - pattern: (await cookies()).set($NAME, $VALUE, {...})
+          # Next.js NextResponse: response.cookies.set(name, value, options?)
+          - pattern: $RESPONSE.cookies.set($NAME, $VALUE)
+          - pattern: $RESPONSE.cookies.set($NAME, $VALUE, {...})
+      - pattern-either:
+          # At least one of the three attributes is missing (or httpOnly is
+          # not literally true).
+          - patterns:
+              - pattern: $OBJ.$SET($NAME, $VALUE, ...)
+              - pattern-not: "$OBJ.$SET($NAME, $VALUE, {..., httpOnly: true, ..., secure: $SECURE, ..., sameSite: $SAMESITE, ...})"
+          # All three are present but Secure is explicitly disabled.
+          - pattern: "$OBJ.$SET($NAME, $VALUE, {..., secure: false, ...})"
+      # Only cookies whose literal name suggests a session or credential.
+      - metavariable-regex:
+          metavariable: $NAME
+          regex: (?i)^["'`].*(sess|sid|auth|token|jwt|refresh|access|login|remember).*["'`]$
