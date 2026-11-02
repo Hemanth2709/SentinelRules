@@ -10,7 +10,7 @@
 | Confidence | MEDIUM |
 | CWE | CWE-1004, CWE-614, CWE-1275 |
 | OWASP | A05:2021 Security Misconfiguration, A07:2021 Identification and Authentication Failures |
-| Status | Tested |
+| Status | Released (v0.1.0) |
 
 ## Purpose
 

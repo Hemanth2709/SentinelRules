@@ -10,7 +10,7 @@
 | Confidence | MEDIUM |
 | CWE | CWE-915 |
 | OWASP | A08:2021 Software and Data Integrity Failures, A04:2021 Insecure Design |
-| Status | Tested |
+| Status | Released (v0.1.0) |
 
 ## Purpose
 

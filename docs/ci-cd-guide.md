@@ -33,13 +33,14 @@ Rule testing is kept separate from application scanning. To run the pack in
 another repository's CI:
 
 ```yaml
-- uses: actions/checkout@v4
-- uses: actions/checkout@v4
+- uses: actions/checkout@v5
+- uses: actions/checkout@v5
   with:
-    repository: <owner>/SentinelRules
+    repository: Hemanth2709/SentinelRules
+    ref: v0.1.0          # pin a release so rule changes don't alter your CI unexpectedly
     path: sentinel-rules
 - run: pip install semgrep==1.180.0
-- run: semgrep scan --metrics=off --config sentinel-rules/rules --error .
+- run: semgrep scan --metrics=off --config sentinel-rules/rules --exclude sentinel-rules --error .
 ```
 
 `--error` makes the job fail when there are findings; omit it to report

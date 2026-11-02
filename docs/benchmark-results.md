@@ -1,5 +1,24 @@
 # Benchmark results
 
+## Summary
+
+| Run | Application | Type | Findings | TP | FP | Unresolved |
+|---|---|---|---|---|---|---|
+| 1 | IdentityProvider (Ralecon) | NestJS + Next.js SDK | 8 | 0 | 8 | 0 |
+| 1b | IdentityProvider, after Server Action fix | NestJS + Next.js SDK | 1 | 0 | 1 | 0 |
+| 2 | Event-Booking-NEST-JS (maintainer's own) | NestJS | 1 | 0 | 1 | 0 |
+| 3 | HemanthG portfolio (maintainer's own) | Next.js 15 | 1 | 0 | 1 | 0 |
+
+Across the latest run of each application (1b, 2, 3): **3 findings, 0 true
+positives, 3 false positives – precision 0%.** Recall is not reported: no
+defined file set was manually reviewed for missed weaknesses.
+
+Only two rule IDs produced any findings
+(`sentinel-nestjs-route-missing-guard`,
+`sentinel-react-dangerously-set-inner-html`). The other eight have no
+real-world observations yet; their absence of findings says nothing about the
+scanned applications' security.
+
 ## Run 1 – IdentityProvider (2026-10-25)
 
 | Field | Value |
@@ -82,6 +101,57 @@ the two runs were not on an identical commit of IdentityProvider.
 
 The fix removed all 7 factory-function false positives. No true positives
 were found in either run, so precision remains 0%; recall is not reported.
+
+## Run 2 – Event-Booking-NEST-JS (2026-11-02)
+
+| Field | Value |
+|---|---|
+| Application | [Hemanth2709/Event-Booking-NEST-JS](https://github.com/Hemanth2709/Event-Booking-NEST-JS) – NestJS 11, GraphQL, Prisma, `@nestjs/jwt` |
+| Commit scanned | `5c521fd` |
+| Permission basis | Maintainer's own public repository |
+| Platform | Linux, Semgrep 1.180.0 |
+| Sentinel Rules commit | `a3c997c` (main) |
+| Scope | 33 files scanned, 0 errors |
+
+| # | Rule ID | Location | Class | Reason |
+|---|---|---|---|---|
+| 1 | `sentinel-nestjs-route-missing-guard` | `src/app.controller.ts` – `getHello` | FP | Default `GET /` "hello" route; public by design and returns no data. |
+
+Limited coverage: the `users`, `events` and `bookings` controllers and
+resolvers are empty scaffolds, so the application has almost no route,
+query, cookie or JWT code yet for the rules to evaluate.
+
+## Run 3 – HemanthG portfolio (2026-11-02)
+
+| Field | Value |
+|---|---|
+| Application | [Hemanth2709/HemanthG](https://github.com/Hemanth2709/HemanthG) – Next.js 15, React 19 |
+| Commit scanned | `c0d7ad5` |
+| Permission basis | Maintainer's own public repository |
+| Platform | Linux, Semgrep 1.180.0 |
+| Sentinel Rules commit | `a3c997c` (main) |
+| Scope | 43 files scanned, 0 errors |
+
+| # | Rule ID | Location | Class | Reason |
+|---|---|---|---|---|
+| 1 | `sentinel-react-dangerously-set-inner-html` | `src/app/layout.tsx` – JSON-LD `<script>` | FP | `JSON.stringify(jsonLd)` of data built from the static `src/data/site.ts`; no user-controlled input. |
+
+The finding is a false positive for this application, but the code uses the
+unescaped form. The Next.js JSON-LD guide recommends
+`JSON.stringify(data).replace(/</g, '\\u003c')`, which keeps the output safe
+even if the data later comes from a CMS or user input.
+
+### Rule change made as a result
+
+`sentinel-react-dangerously-set-inner-html` now treats
+`JSON.stringify(...).replace(/</g, ...)` as safe. Only the global regex form is
+accepted; `.replace('<', ...)` replaces the first occurrence only and is still
+reported. New fixtures: `JsonLdEscaped` (ok), `JsonLdUnescaped` and
+`JsonLdFirstOnlyEscape` (ruleid). The escaped fixture failed before the change
+and passes after. The portfolio still reports 1 finding until its JSON-LD is
+escaped.
+
+## Run 1 notes
 
 ### Other observation
 

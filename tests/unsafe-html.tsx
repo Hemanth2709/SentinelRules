@@ -26,6 +26,19 @@ export function CreateElementBanner({ html }: { html: string }) {
   return React.createElement('div', { dangerouslySetInnerHTML: { __html: html } });
 }
 
+export function JsonLdUnescaped({ data }: { data: Record<string, unknown> }) {
+  // JSON.stringify does not escape `</script>`, so a value containing it can
+  // break out of the script element.
+  // ruleid: sentinel-react-dangerously-set-inner-html
+  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }} />;
+}
+
+export function JsonLdFirstOnlyEscape({ data }: { data: Record<string, unknown> }) {
+  // A string pattern only replaces the first `<`; later ones stay unescaped.
+  // ruleid: sentinel-react-dangerously-set-inner-html
+  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data).replace('<', '\\u003c') }} />;
+}
+
 // ---------------------------------------------------------------------------
 // Expected non-findings
 // ---------------------------------------------------------------------------
@@ -50,4 +63,11 @@ export function PlainJsxText({ post }: { post: Post }) {
   // React escapes text children; no raw HTML is rendered.
   // ok: sentinel-react-dangerously-set-inner-html
   return <h1>{post.title}</h1>;
+}
+
+export function JsonLdEscaped({ data }: { data: Record<string, unknown> }) {
+  // Form recommended by the Next.js JSON-LD guide: every `<` is escaped, so
+  // the payload cannot close the script element.
+  // ok: sentinel-react-dangerously-set-inner-html
+  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data).replace(/</g, '\\u003c') }} />;
 }

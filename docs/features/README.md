@@ -14,11 +14,11 @@ Each rule has its own folder with the same seven documents:
 
 | # | Feature | Rule IDs | Status |
 |---|---|---|---|
-| 01 | [SQL injection](01-sql-injection/README.md) | `sentinel-sql-injection-raw-query` | Tested |
-| 02 | [JWT misconfiguration](02-jwt-misconfiguration/README.md) | `sentinel-jwt-ignore-expiration`, `sentinel-jwt-verify-missing-algorithms` | Tested |
-| 03 | [ValidationPipe](03-validation-pipe/README.md) | `sentinel-nestjs-validation-pipe-missing-whitelist` | Tested |
-| 04 | [Public secrets](04-next-public-secrets/README.md) | `sentinel-next-public-secret-env` | Tested |
-| 05 | [Unsafe HTML](05-unsafe-html/README.md) | `sentinel-react-dangerously-set-inner-html` | Tested |
-| 06 | [Insecure cookies](06-insecure-cookies/README.md) | `sentinel-insecure-session-cookie` | Tested |
-| 07 | [CORS misconfiguration](07-cors-misconfiguration/README.md) | `sentinel-cors-credentials-any-origin` | Tested |
-| 08 | [Missing authorization](08-missing-authorization/README.md) | `sentinel-nestjs-route-missing-guard`, `sentinel-nextjs-handler-missing-auth-check` | Tested |
+| 01 | [SQL injection](01-sql-injection/README.md) | `sentinel-sql-injection-raw-query` | Released (v0.1.0) |
+| 02 | [JWT misconfiguration](02-jwt-misconfiguration/README.md) | `sentinel-jwt-ignore-expiration`, `sentinel-jwt-verify-missing-algorithms` | Released (v0.1.0) |
+| 03 | [ValidationPipe](03-validation-pipe/README.md) | `sentinel-nestjs-validation-pipe-missing-whitelist` | Released (v0.1.0) |
+| 04 | [Public secrets](04-next-public-secrets/README.md) | `sentinel-next-public-secret-env` | Released (v0.1.0) |
+| 05 | [Unsafe HTML](05-unsafe-html/README.md) | `sentinel-react-dangerously-set-inner-html` | Released (v0.1.0) |
+| 06 | [Insecure cookies](06-insecure-cookies/README.md) | `sentinel-insecure-session-cookie` | Released (v0.1.0) |
+| 07 | [CORS misconfiguration](07-cors-misconfiguration/README.md) | `sentinel-cors-credentials-any-origin` | Released (v0.1.0) |
+| 08 | [Missing authorization](08-missing-authorization/README.md) | `sentinel-nestjs-route-missing-guard`, `sentinel-nextjs-handler-missing-auth-check` | Released (v0.1.0) |
