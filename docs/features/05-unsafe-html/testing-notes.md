@@ -9,6 +9,8 @@ Fixture: [`tests/unsafe-html.tsx`](../../../tests/unsafe-html.tsx)
 | `PostBody` | `__html: post.bodyHtml` |
 | `SearchPage` | template literal with `${searchParams.q}` |
 | `CreateElementBanner` | `React.createElement(..., { dangerouslySetInnerHTML: { __html: html } })` |
+| `JsonLdUnescaped` | `JSON.stringify(data)` in a JSON-LD script |
+| `JsonLdFirstOnlyEscape` | `JSON.stringify(data).replace('<', ...)` – first `<` only |
 
 ## Expected non-findings
 
@@ -18,6 +20,7 @@ Fixture: [`tests/unsafe-html.tsx`](../../../tests/unsafe-html.tsx)
 | `SanitizedInline` | `DOMPurify.sanitize(...)` inline |
 | `SanitizedVariable` | `sanitizeHtml(...)` assigned to a variable first |
 | `PlainJsxText` | `<h1>{post.title}</h1>` |
+| `JsonLdEscaped` | `JSON.stringify(data).replace(/</g, '\\u003c')` |
 
 ## Commands
 
@@ -31,11 +34,13 @@ scripts/run-tests.sh
 | Date | Semgrep | Result |
 |---|---|---|
 | 2026-10-25 | 1.180.0 | `✓ All tests passed` (3 findings, 4 non-findings) |
+| 2026-11-02 | 1.180.0 | `✓ All tests passed` (5 findings, 5 non-findings) after the JSON-LD change |
 
 ## Failures and resolutions
 
 | Date | Problem | Resolution |
 |---|---|---|
+| 2026-11-02 | Portfolio benchmark (run 3): the recommended escaped JSON-LD form would also have been reported. | Added `JsonLdEscaped` fixture, confirmed it failed (`incorrect lines: [72]`), then excluded `JSON.stringify(...).replace(/</g, ...)`. |
 | 2026-10-25 | The `SearchPage` annotation was written as a JSX comment (`{/* ruleid: ... */}`). Semgrep's test runner did not read it, so the finding on the next line was reported as unexpected. | Moved the element into a `const` with a normal `// ruleid:` comment above it. |
 
 ## Ad-hoc observations (2026-10-25)

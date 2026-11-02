@@ -10,7 +10,7 @@
 | Confidence | LOW |
 | CWE | CWE-862 (both), CWE-306 (Next.js) |
 | OWASP | A01:2021 Broken Access Control (both), A07:2021 (Next.js) |
-| Status | Tested |
+| Status | Released (v0.1.0) |
 
 ## Purpose
 

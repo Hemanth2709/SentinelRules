@@ -19,6 +19,19 @@ Recorded during implementation of rules 01–08 and the first benchmark scan on
 - **The global-guard limitation is real.** The one remaining finding is a
   route protected by `APP_GUARD` in another file, exactly as documented.
 
+## From benchmark runs 2 and 3 (own repositories)
+
+- **Young applications give little signal.** The NestJS app's controllers
+  were still empty scaffolds; the only finding was the default hello route.
+  A useful benchmark needs code with real routes, cookies and queries.
+- **Safe forms recommended by the framework must be recognised.** Next.js
+  documents an escaped JSON-LD pattern; a rule that reports it trains
+  developers to ignore findings. Recognising exactly that form (global `/</g`
+  only) kept the rule strict about the unsafe variants.
+- **A false positive can still point at a worthwhile change.** The portfolio's
+  JSON-LD is safe today because its data is static; escaping it costs one
+  method call and keeps it safe if the data source changes.
+
 ## Harder to detect than expected
 
 - **Missing authorization.** Everything that matters – global guards,

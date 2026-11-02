@@ -15,6 +15,8 @@ Rule: [`rules/unsafe-html.yml`](../../../rules/unsafe-html.yml)
      `sanitizeHtml(...)`, `sanitize(...)`.
    - A variable assigned from one of those sanitizers earlier in the same
      scope (`pattern-not-inside: $HTML = $PURIFY.sanitize(...); ...`).
+   - Escaped JSON-LD: `JSON.stringify(...).replace(/</g, $ESCAPE)`. Only the
+     global regex form; `.replace('<', ...)` escapes the first `<` only.
 3. `focus-metavariable: $HTML` – the finding points at the value.
 
 ## Why these patterns

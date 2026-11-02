@@ -2,6 +2,10 @@
 
 ## Known false positives
 
+- JSON-LD built from static, developer-controlled data and serialized
+  without escaping (observed in benchmark run 3). Escaping with
+  `.replace(/</g, '\\u003c')` both removes the finding and protects against
+  data that later becomes dynamic.
 - HTML produced entirely by trusted code (e.g. a syntax highlighter run at
   build time on repository files).
 - Values sanitized in another function or module before being passed in.

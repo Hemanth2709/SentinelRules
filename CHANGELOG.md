@@ -5,8 +5,17 @@ All notable changes are recorded here. The format follows
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-11-02
+
+First release.
+
 ### Fixed
 
+- `sentinel-react-dangerously-set-inner-html` accepts JSON-LD escaped as
+  `JSON.stringify(...).replace(/</g, ...)` (benchmark run 3); the
+  first-occurrence-only `.replace('<', ...)` is still reported.
+- CI uses `actions/checkout@v5` and `actions/setup-python@v6` (removes the
+  Node.js 20 deprecation warning).
 - Tests could silently skip rule files on Windows (`PermissionError` on
   `~/.semgrep/settings.yml`). New `scripts/run-tests.sh` runs one rule file
   at a time with a private settings file; CI and docs use it.
@@ -18,17 +27,21 @@ All notable changes are recorded here. The format follows
 
 ### Added
 
-- Benchmark run 1 results (IdentityProvider).
+- Benchmark runs 1, 1b, 2 and 3 (IdentityProvider, Event-Booking-NEST-JS,
+  HemanthG).
 
 - Eight rule features (ten rule IDs) in `rules/`: SQL injection, JWT
   misconfiguration (two IDs), ValidationPipe whitelist, `NEXT_PUBLIC_`
   secrets, unsafe `dangerouslySetInnerHTML`, insecure session cookies,
   credentialed CORS with any origin, and missing-authorization heuristics for
   NestJS and Next.js (two IDs).
-- Annotated fixtures in `tests/` (38 `ruleid`, 45 `ok`).
+- Annotated fixtures in `tests/` (40 `ruleid`, 46 `ok`).
 - Vulnerable and secure examples in `examples/` and
   `scripts/check-examples.sh`.
 - GitHub Actions workflow running validation, fixtures, and example checks
   with Semgrep 1.180.0.
 - Documentation: guides, per-feature docs, security mappings, benchmark
   methodology, decision log, milestone logs, learning notes.
+
+[Unreleased]: https://github.com/Hemanth2709/SentinelRules/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/Hemanth2709/SentinelRules/releases/tag/v0.1.0

@@ -48,6 +48,10 @@ rules:
       - pattern-not: "{__html: $PURIFY.sanitize(...)}"
       - pattern-not: "{__html: sanitizeHtml(...)}"
       - pattern-not: "{__html: sanitize(...)}"
+      # JSON-LD escaped as the Next.js guide recommends: every `<` becomes
+      # <, so the payload cannot close the <script> element. Only the
+      # global regex form counts; a string pattern replaces the first `<` only.
+      - pattern-not: "{__html: JSON.stringify(...).replace(/</g, $ESCAPE)}"
       # Value sanitized into a variable earlier in the same scope.
       - pattern-not-inside: |
           $HTML = $PURIFY.sanitize(...);

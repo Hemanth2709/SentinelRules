@@ -39,23 +39,25 @@ React, Express-style APIs, Prisma, TypeORM, Knex, node-postgres,
 
 | # | Rule | Rule ID(s) | Framework | Security issue | Severity | Status |
 |---|---|---|---|---|---|---|
-| 01 | [SQL injection](docs/features/01-sql-injection/README.md) | `sentinel-sql-injection-raw-query` | NestJS / Node.js | Unsafe raw SQL construction | ERROR | Tested |
-| 02 | [JWT misconfiguration](docs/features/02-jwt-misconfiguration/README.md) | `sentinel-jwt-ignore-expiration` · `sentinel-jwt-verify-missing-algorithms` | NestJS / Node.js | Weak JWT verification configuration | ERROR · WARNING | Tested |
-| 03 | [ValidationPipe](docs/features/03-validation-pipe/README.md) | `sentinel-nestjs-validation-pipe-missing-whitelist` | NestJS | Inadequate input-property restrictions | WARNING | Tested |
-| 04 | [Public secrets](docs/features/04-next-public-secrets/README.md) | `sentinel-next-public-secret-env` | Next.js | Potential client-side secret exposure | ERROR | Tested |
-| 05 | [Unsafe HTML](docs/features/05-unsafe-html/README.md) | `sentinel-react-dangerously-set-inner-html` | Next.js / React | Potential XSS | WARNING | Tested |
-| 06 | [Insecure cookies](docs/features/06-insecure-cookies/README.md) | `sentinel-insecure-session-cookie` | NestJS / Next.js | Missing cookie security attributes | WARNING | Tested |
-| 07 | [CORS misconfiguration](docs/features/07-cors-misconfiguration/README.md) | `sentinel-cors-credentials-any-origin` | NestJS / Node.js | Overly permissive credentialed CORS | ERROR | Tested |
-| 08 | [Missing authorization](docs/features/08-missing-authorization/README.md) | `sentinel-nestjs-route-missing-guard` · `sentinel-nextjs-handler-missing-auth-check` | NestJS / Next.js | Potential missing access control (heuristic) | WARNING | Tested |
+| 01 | [SQL injection](docs/features/01-sql-injection/README.md) | `sentinel-sql-injection-raw-query` | NestJS / Node.js | Unsafe raw SQL construction | ERROR | Released |
+| 02 | [JWT misconfiguration](docs/features/02-jwt-misconfiguration/README.md) | `sentinel-jwt-ignore-expiration` · `sentinel-jwt-verify-missing-algorithms` | NestJS / Node.js | Weak JWT verification configuration | ERROR · WARNING | Released |
+| 03 | [ValidationPipe](docs/features/03-validation-pipe/README.md) | `sentinel-nestjs-validation-pipe-missing-whitelist` | NestJS | Inadequate input-property restrictions | WARNING | Released |
+| 04 | [Public secrets](docs/features/04-next-public-secrets/README.md) | `sentinel-next-public-secret-env` | Next.js | Potential client-side secret exposure | ERROR | Released |
+| 05 | [Unsafe HTML](docs/features/05-unsafe-html/README.md) | `sentinel-react-dangerously-set-inner-html` | Next.js / React | Potential XSS | WARNING | Released |
+| 06 | [Insecure cookies](docs/features/06-insecure-cookies/README.md) | `sentinel-insecure-session-cookie` | NestJS / Next.js | Missing cookie security attributes | WARNING | Released |
+| 07 | [CORS misconfiguration](docs/features/07-cors-misconfiguration/README.md) | `sentinel-cors-credentials-any-origin` | NestJS / Node.js | Overly permissive credentialed CORS | ERROR | Released |
+| 08 | [Missing authorization](docs/features/08-missing-authorization/README.md) | `sentinel-nestjs-route-missing-guard` · `sentinel-nextjs-handler-missing-auth-check` | NestJS / Next.js | Potential missing access control (heuristic) | WARNING | Released |
 
-"Tested" means all positive and negative fixtures pass with the pinned
-Semgrep version. No rule is marked "Released" until the benchmark and public
-release are complete.
+"Released" means the rule is part of
+[v0.1.0](https://github.com/Hemanth2709/SentinelRules/releases/tag/v0.1.0)
+and all of its positive and negative fixtures pass with the pinned Semgrep
+version. It does not mean the rule has been validated on real applications:
+see the benchmark section below.
 
 ## Installation
 
 ```bash
-git clone https://github.com/Hemanth2709/SentinelRules.git
+git clone --branch v0.1.0 https://github.com/Hemanth2709/SentinelRules.git
 cd SentinelRules
 python3 -m venv .venv && source .venv/bin/activate
 pip install semgrep==1.180.0
@@ -154,12 +156,12 @@ Every feature has the same before/after pair in `examples/` and in its
 
 Methodology: [docs/benchmark-methodology.md](docs/benchmark-methodology.md).
 
-First run (IdentityProvider, a NestJS identity provider with a Next.js SDK,
-2026-10-25): **8 findings, 0 true positives, 8 false positives – precision
-0%**, all from the two authorization heuristics. Seven were caused by a rule
-bug (non-async factories in a `'use server'` file), fixed with a regression
-test; a re-scan after the fix reported only the remaining one, the documented
-global-guard limitation.
+Three applications scanned (a NestJS identity provider with a Next.js SDK, a
+NestJS event-booking API, and a Next.js portfolio). Latest runs: **3
+findings, 0 true positives, 3 false positives – precision 0% on a small
+sample**. Two benchmark findings exposed rule problems that were fixed with
+regression tests: non-async factories mistaken for Server Actions (7 false
+positives removed) and the escaped JSON-LD form recommended by Next.js.
 Recall is not reported. Details:
 [docs/benchmark-results.md](docs/benchmark-results.md).
 

@@ -10,7 +10,7 @@
 | Confidence | MEDIUM |
 | CWE | CWE-200, CWE-522 |
 | OWASP | A01:2021 Broken Access Control, A05:2021 Security Misconfiguration |
-| Status | Tested |
+| Status | Released (v0.1.0) |
 
 ## Purpose
 

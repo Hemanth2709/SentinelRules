@@ -41,9 +41,18 @@ allowlist, including event handlers and `javascript:` URLs.
 
 `dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}` inside a
 `<script>` tag is reported. `JSON.stringify` does not escape `</script>`, so a
-value containing it can break out. Escape `<` (e.g.
-`JSON.stringify(data).replace(/</g, '\\u003c')`) and confirm the source of
-the data.
+value containing it can break out. Use the form from the Next.js JSON-LD
+guide, which the rule accepts:
+
+```tsx
+<script
+  type="application/ld+json"
+  dangerouslySetInnerHTML={{ __html: JSON.stringify(data).replace(/</g, '\\u003c') }}
+/>
+```
+
+Use the global regex `/</g`; `.replace('<', ...)` only escapes the first
+`<` and is still reported.
 
 ## Additional controls
 

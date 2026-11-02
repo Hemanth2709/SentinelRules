@@ -23,9 +23,9 @@ publish the repository.
 | Vulnerable and secure examples | Done – `examples/` |
 | False-positive documentation | Done from development observations – [false-positives.md](../false-positives.md); benchmark observations pending |
 | Benchmark methodology | Done – [benchmark-methodology.md](../benchmark-methodology.md) |
-| Application scan (authorized) | Run 1 done on IdentityProvider (2026-10-25); permission basis and commit SHA still to be recorded |
-| Benchmark report | Runs 1 and 1b recorded – [benchmark-results.md](../benchmark-results.md) |
-| Public release | **Pending** |
+| Application scan (authorized) | Done – IdentityProvider (runs 1, 1b; commit SHA and permission record outstanding), Event-Booking-NEST-JS (run 2), HemanthG portfolio (run 3) |
+| Benchmark report | Done – [benchmark-results.md](../benchmark-results.md): 3 applications, latest runs 3 findings, 0 TP, precision 0% |
+| Public release | Repository is public; `v0.1.0` tagged on the merge commit of the release PR |
 | Evidence of successful CI | Done – [run #3](https://github.com/Hemanth2709/SentinelRules/actions/runs/40168233347) on `main` |
 | Integration into portfolio application CI (W6) | **Pending** |
 
@@ -41,6 +41,9 @@ rules.
 | Benchmark run 1 (IdentityProvider) | 8 findings, 0 TP, 8 FP, precision 0% |
 | Rule fix (Server Action async) | Regression fixture failed before, passes after; 10/10 tests, 16/16 examples |
 | Re-scan after fix (run 1b) | 1 finding (the global-guard FP), as expected |
+| Benchmark run 2 (Event-Booking-NEST-JS, `5c521fd`) | 1 finding, FP (public hello route) |
+| Benchmark run 3 (HemanthG, `c0d7ad5`) | 1 finding, FP (JSON-LD from static data) |
+| Rule fix (escaped JSON-LD accepted) | New `ok` fixture failed before, passes after; 8/8 rule files, 16/16 examples |
 
 ## Learning notes
 
@@ -53,9 +56,11 @@ None yet.
 
 ## Known limitations
 
-Only one application has been scanned, and only the authorization rules
-produced findings, so the other eight rule IDs have no real-world precision
-data. Recall is unknown.
+Three applications have been scanned. Only two rule IDs produced findings,
+all false positives, so real-world precision is 0% on a very small sample and
+eight rule IDs have no real-world observations. Recall is unknown. The scanned
+applications contain little code of the kinds most rules target (cookies,
+CORS, raw SQL, JWT verification).
 
 ## Completion review
 

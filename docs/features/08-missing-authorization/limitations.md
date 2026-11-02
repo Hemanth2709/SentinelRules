@@ -9,8 +9,9 @@
   mark public routes with `@Public()` (which the rule honours) or disable this
   rule.
 - Intentionally public endpoints not marked with a recognised decorator:
-  login, registration, health checks (observed on the login routes in
-  `examples/*/insecure-cookies.ts`).
+  login, registration, health checks, the default `GET /` hello route
+  (observed on the login routes in `examples/*/insecure-cookies.ts` and in
+  benchmark run 2).
 - Webhooks protected by signature verification rather than a session.
 - Next.js handlers protected by `middleware.ts`, a wrapper
   (`withAuth(handler)`), or an authentication helper with an unrecognised

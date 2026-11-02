@@ -10,7 +10,7 @@
 | Confidence | MEDIUM |
 | CWE | CWE-89 |
 | OWASP | A03:2021 Injection |
-| Status | Tested |
+| Status | Released (v0.1.0) |
 
 ## Purpose
 
