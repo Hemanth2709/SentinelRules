@@ -5,6 +5,11 @@ All notable changes are recorded here. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- Benchmark documentation no longer names the private project scanned in
+  runs 1/1b or its internal files and functions (DEC-008).
+
 ## [0.1.0] - 2026-11-02
 
 First release.
@@ -27,8 +32,8 @@ First release.
 
 ### Added
 
-- Benchmark runs 1, 1b, 2 and 3 (IdentityProvider, Event-Booking-NEST-JS,
-  HemanthG).
+- Benchmark runs 1, 1b, 2 and 3 (a private identity provider,
+  Event-Booking-NEST-JS, HemanthG).
 
 - Eight rule features (ten rule IDs) in `rules/`: SQL injection, JWT
   misconfiguration (two IDs), ValidationPipe whitelist, `NEXT_PUBLIC_`

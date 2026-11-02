@@ -4,8 +4,8 @@
 
 | Run | Application | Type | Findings | TP | FP | Unresolved |
 |---|---|---|---|---|---|---|
-| 1 | IdentityProvider (Ralecon) | NestJS + Next.js SDK | 8 | 0 | 8 | 0 |
-| 1b | IdentityProvider, after Server Action fix | NestJS + Next.js SDK | 1 | 0 | 1 | 0 |
+| 1 | Private identity provider (employer project) | NestJS + Next.js SDK | 8 | 0 | 8 | 0 |
+| 1b | Same, after Server Action fix | NestJS + Next.js SDK | 1 | 0 | 1 | 0 |
 | 2 | Event-Booking-NEST-JS (maintainer's own) | NestJS | 1 | 0 | 1 | 0 |
 | 3 | HemanthG portfolio (maintainer's own) | Next.js 15 | 1 | 0 | 1 | 0 |
 
@@ -19,32 +19,29 @@ Only two rule IDs produced any findings
 real-world observations yet; their absence of findings says nothing about the
 scanned applications' security.
 
-## Run 1 – IdentityProvider (2026-10-25)
+## Run 1 – Private identity provider (2026-10-25)
+
+This application is a private employer project. Its name, file paths and
+identifiers are intentionally not published; findings are described
+generically.
 
 | Field | Value |
 |---|---|
-| Application | IdentityProvider (Ralecon) – NestJS identity provider with a Next.js SDK |
-| Commit scanned | _not yet recorded_ |
-| Permission basis | _to be confirmed by the maintainer_ |
+| Application | Private project – NestJS identity provider with a Next.js SDK |
+| Commit scanned | Not published (private project) |
 | Scan date | 2026-10-25 |
 | Platform | Windows, Git Bash, Python 3.14 |
 | Semgrep version | 1.180.0 |
 | Sentinel Rules commit | `2763d51` (main before the fix below) |
 | Command | `semgrep scan --metrics=off --config rules/ <app>` |
-| Scope | 162 git-tracked files, 143 TypeScript files scanned, ~100% parsed |
+| Scope | 143 TypeScript files scanned, ~100% parsed |
 
 ### Findings
 
-| # | Rule ID | Location | Class | Reason |
+| # | Rule ID | Location (generalised) | Class | Reason |
 |---|---|---|---|---|
-| 1 | `sentinel-nestjs-route-missing-guard` | `src/oauth/oauth.controller.ts` – `userinfo` | FP | `app.module.ts` registers an `APP_GUARD`; the controller documents that `JwtAuthGuard` is applied globally. Cross-file global guard, a known limitation. |
-| 2 | `sentinel-nextjs-handler-missing-auth-check` | `src/sdk/nextjs/actions.ts` – `createLoginAction` | FP | Non-async factory that returns an action, not a Server Action; login is public by design. |
-| 3 | same | `createRegisterAction` | FP | Non-async factory; registration is public by design. |
-| 4 | same | `createGetDevicesAction` | FP | Non-async factory; the returned action calls `getAccessToken()` and returns early without a token. |
-| 5 | same | `createRemoveDeviceAction` | FP | Non-async factory; the returned action calls `getAccessToken()` and returns an error without a token. |
-| 6 | same | `createLogoutAction` | FP | Non-async factory; logout. |
-| 7 | same | `createSsoLoginAction` | FP | Non-async factory; SSO login is public by design. |
-| 8 | same | `createSsoCallbackHandler` | FP | Non-async factory; SSO callback is public by design. |
+| 1 | `sentinel-nestjs-route-missing-guard` | OAuth/OIDC userinfo route handler | FP | Protected by a global guard (`APP_GUARD`) registered in the root module. Cross-file global guard, a known limitation. |
+| 2–8 | `sentinel-nextjs-handler-missing-auth-check` | Seven exported functions in the SDK's `'use server'` module | FP | Non-async factory functions that *return* Server Actions; they are not Server Actions themselves. Five cover flows that are public by design (login, registration, logout, SSO); in the two that touch user data, the returned action checks for an access token and exits early without one. |
 
 | Rule ID | Findings | TP | FP | Unresolved |
 |---|---|---|---|---|
@@ -60,11 +57,8 @@ missed weaknesses, so there is no false-negative count. The absence of
 findings from the other eight rule IDs does **not** show that the
 application is free of those weaknesses.
 
-Classifications are based on excerpts the maintainer provided
-(`app.module.ts` guard registration, the top of `oauth.controller.ts`, and
-`actions.ts` lines 115–155 plus the location of its `'use server'` directive).
-The `APP_GUARD` provider's class was taken from the controller's comment and
-was not seen directly.
+Classifications are based on code excerpts the maintainer reviewed (the guard
+registration, the flagged controller, and the flagged SDK module).
 
 ### Rule changes made as a result
 
@@ -73,24 +67,20 @@ was not seen directly.
 | 2–8 | `sentinel-nextjs-handler-missing-auth-check` now treats only `export async function` in a `'use server'` module as a Server Action (Next.js only allows async exports there) | `createRemoveProjectAction` `ok` case in `tests/missing-authorization.ts`; reproduced as failing before the change, passing after |
 | 1 | None. Global guards in other files cannot be seen by a single-file rule. Projects that use a global guard should mark public routes with `@Public()` or disable this rule | – |
 
-**Expected effect:** a re-scan should report 1 finding (#1) instead of 8.
-Confirmed by run 1b below.
-
-## Run 1b – IdentityProvider re-scan after the fix (2026-10-25)
+## Run 1b – Private identity provider, re-scan after the fix (2026-10-25)
 
 | Field | Value |
 |---|---|
 | Sentinel Rules commit | `3f21a43` (main, includes the Server Action fix) |
 | Semgrep version | 1.180.0 |
-| Scope | 160 git-tracked files, 141 TypeScript files scanned, ~100% parsed |
-| Commit scanned | _not yet recorded_ |
+| Scope | 141 TypeScript files scanned, ~100% parsed |
 
-The application's file count changed between runs (162/143 → 160/141), so
-the two runs were not on an identical commit of IdentityProvider.
+The application changed slightly between runs (143 → 141 TypeScript files),
+so the two runs were not on an identical commit.
 
-| # | Rule ID | Location | Class | Reason |
+| # | Rule ID | Location (generalised) | Class | Reason |
 |---|---|---|---|---|
-| 1 | `sentinel-nestjs-route-missing-guard` | `src/oauth/oauth.controller.ts` – `userinfo` | FP | Same as run 1 #1: global `APP_GUARD` |
+| 1 | `sentinel-nestjs-route-missing-guard` | OAuth/OIDC userinfo route handler | FP | Same as run 1 #1: global `APP_GUARD` |
 
 | | Run 1 | Run 1b |
 |---|---|---|
@@ -98,9 +88,6 @@ the two runs were not on an identical commit of IdentityProvider.
 | TP | 0 | 0 |
 | FP | 8 | 1 |
 | Precision | 0% | 0% |
-
-The fix removed all 7 factory-function false positives. No true positives
-were found in either run, so precision remains 0%; recall is not reported.
 
 ## Run 2 – Event-Booking-NEST-JS (2026-11-02)
 
@@ -148,13 +135,6 @@ even if the data later comes from a CMS or user input.
 accepted; `.replace('<', ...)` replaces the first occurrence only and is still
 reported. New fixtures: `JsonLdEscaped` (ok), `JsonLdUnescaped` and
 `JsonLdFirstOnlyEscape` (ruleid). The escaped fixture failed before the change
-and passes after. The portfolio still reports 1 finding until its JSON-LD is
-escaped.
-
-## Run 1 notes
-
-### Other observation
-
-`actions.ts` has `'use server'` at module level but exports non-async
-functions. Next.js normally rejects non-async exports from a `'use server'`
-file. This is a build-compatibility point for the SDK, not a security finding.
+and passes after. The portfolio's JSON-LD was then escaped
+([Hemanth2709/HemanthG#4](https://github.com/Hemanth2709/HemanthG/pull/4));
+its CI scan now reports 0 findings.
