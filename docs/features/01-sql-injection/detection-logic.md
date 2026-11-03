@@ -11,13 +11,16 @@ The rule reports a call when all of these hold:
    `$METHOD`).
 2. **SQL argument** – the first argument (`$SQLSTR`) is either written in the
    call, or is a variable assigned (`=`) or appended to (`+=`) earlier in the
-   same scope.
+   same scope. Appends inside an `if`/`else` branch or a `for`/`while` loop
+   (with or without braces) are tracked too, which is how optional filters are
+   usually built.
 3. **Dynamic text** – `$SQLSTR` is a template literal containing at least one
    `${...}`, a `+` concatenation, or a `.concat(...)` call
    (`metavariable-pattern`).
 4. **Looks like SQL** – the source text of `$SQLSTR` matches an SQL keyword
    regex such as `select ... from`, `insert into`, `update ... set`,
-   `delete from`, `where`, `order by`, `group by`, `values (`
+   `delete from`, `where`, `order by`, `group by`, `and`/`or <column> =`,
+   `values (`
    (`metavariable-regex`).
 
 ## Why these patterns

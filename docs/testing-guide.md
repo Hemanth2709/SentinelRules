@@ -77,5 +77,6 @@ Never weaken a negative test to make an inaccurate rule pass.
 | 2026-10-25 | 1.180.0 | `scripts/run-tests.sh` (Windows, Git Bash, Python 3.14) | 8/8 rule files PASS, no `PermissionError` |
 | 2026-10-25 | 1.180.0 | `scripts/check-examples.sh` (Windows, Git Bash, Python 3.14) | all examples PASS (with `python`, no `python3`) |
 | 2026-11-02 | 1.180.0 | `scripts/run-tests.sh` after the JSON-LD change (Linux) | 8/8 rule files, 16/16 examples |
+| 2026-11-03 | 1.180.0 | `scripts/run-tests.sh` after the v0.1.1 SQL fix (Linux) | 8/8 rule files, 16/16 examples |
 
-Fixture totals: 40 `ruleid` and 46 `ok` annotations across 10 rule IDs.
+Fixture totals: 47 `ruleid` and 47 `ok` annotations across 10 rule IDs.

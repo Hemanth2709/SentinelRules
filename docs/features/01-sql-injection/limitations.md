@@ -14,7 +14,10 @@
 
 ## Known false negatives
 
-- SQL built in another function, module, or class property and passed in.
+- SQL built in another function, module, or class property and passed in
+  (benchmark case V-03, still missed in v0.1.1).
+- `+=` appends inside `switch`, `try`/`catch` or `do`/`while` blocks (not
+  covered by a pattern and not tested).
 - SQL built with `Array.prototype.join`, `util.format`, or a helper.
 - Prisma `Prisma.raw()` misuse such as
   ``$queryRaw`... ${Prisma.raw(userInput)}` `` (confirmed not reported in an

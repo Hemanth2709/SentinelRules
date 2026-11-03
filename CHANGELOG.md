@@ -5,6 +5,22 @@ All notable changes are recorded here. The format follows
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-11-03
+
+### Fixed
+
+- `sentinel-sql-injection-raw-query` now tracks `sql += ...` inside
+  `if`/`else` branches and `for`/`while` loops, with or without braces. These
+  were previously missed (found by the ground-truth benchmark, case V-02).
+- `sentinel-sql-injection-raw-query` recognises appended clauses starting
+  with `OR <column> =` as SQL.
+
+### Added
+
+- Ground-truth benchmark results (26 planted vulnerabilities, 20 safe
+  look-alikes) in `docs/benchmark-results.md`.
+- `AGENTS.md` briefing for AI coding assistants.
+
 ### Changed
 
 - Benchmark documentation no longer names the private project scanned in
@@ -48,5 +64,6 @@ First release.
 - Documentation: guides, per-feature docs, security mappings, benchmark
   methodology, decision log, milestone logs, learning notes.
 
-[Unreleased]: https://github.com/Hemanth2709/SentinelRules/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/Hemanth2709/SentinelRules/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/Hemanth2709/SentinelRules/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/Hemanth2709/SentinelRules/releases/tag/v0.1.0

@@ -50,6 +50,30 @@ rules:
                   - pattern-inside: |
                       $SQLVAR += $SQLSTR;
                       ...
+                  # Optional filters appended conditionally, with or without
+                  # braces, e.g. `if (status) sql += ...` (benchmark V-02).
+                  - pattern-inside: |
+                      if ($COND) $SQLVAR += $SQLSTR;
+                      ...
+                  - pattern-inside: |
+                      if ($COND) { ... $SQLVAR += $SQLSTR; ... }
+                      ...
+                  - pattern-inside: |
+                      if ($COND) { ... } else { ... $SQLVAR += $SQLSTR; ... }
+                      ...
+                  # Filters appended in a loop, e.g. one clause per tag.
+                  - pattern-inside: |
+                      for (...) { ... $SQLVAR += $SQLSTR; ... }
+                      ...
+                  - pattern-inside: |
+                      for (...) $SQLVAR += $SQLSTR;
+                      ...
+                  - pattern-inside: |
+                      while ($COND) { ... $SQLVAR += $SQLSTR; ... }
+                      ...
+                  - pattern-inside: |
+                      while ($COND) $SQLVAR += $SQLSTR;
+                      ...
               - pattern: $DB.$METHOD($SQLVAR, ...)
       - metavariable-regex:
           metavariable: $METHOD
@@ -67,4 +91,4 @@ rules:
       # out of scope.
       - metavariable-regex:
           metavariable: $SQLSTR
-          regex: (?is).*\b(select\s.+\sfrom|insert\s+into|update\s.+\sset|delete\s+from|where\s|order\s+by|group\s+by|and\s+\w+\s*(=|like|in)|values\s*\()
+          regex: (?is).*\b(select\s.+\sfrom|insert\s+into|update\s.+\sset|delete\s+from|where\s|order\s+by|group\s+by|(and|or)\s+\w+\s*(=|like|in)|values\s*\()
