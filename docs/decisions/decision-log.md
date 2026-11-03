@@ -79,6 +79,29 @@
   with no `PermissionError`, and `check-examples.sh` passed using `python`.
 - **Related:** DEC-003, CI.
 
+### DEC-008: Generalise details of private projects in public documentation
+
+- **Status:** Accepted
+- **Date:** 2026-11-02
+- **Context:** Benchmark runs 1 and 1b scanned a private employer project.
+  The first write-up published its name, internal file paths and function
+  names. No vulnerability was disclosed (all findings were false positives),
+  but the details describe a private codebase's structure, and publishing
+  them had not been cleared with the owner.
+- **Decision:** Public documentation refers to private projects only by type
+  (e.g. "private NestJS identity provider with a Next.js SDK") and describes
+  findings generically (e.g. "OAuth userinfo route handler"). Counts,
+  classifications and the resulting rule changes are kept. Commit SHAs of
+  private projects are not published. Client projects are not named at all.
+- **Alternatives considered:** Rewriting git history to remove the earlier
+  wording (rejected for now: it would force-push `main` and re-create
+  `v0.1.0`); removing runs 1/1b entirely (rejected: they produced the main
+  rule fix and its lesson).
+- **Consequences:** The earlier wording remains visible in git history and in
+  the `v0.1.0` tag. Benchmark records for private projects cannot be
+  independently reproduced from the public repository.
+- **Related:** Milestone 4, benchmark.
+
 ### DEC-004: One rule file per feature; multiple rule IDs allowed
 
 - **Status:** Accepted

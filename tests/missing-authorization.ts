@@ -131,7 +131,7 @@ export async function renameProject(projectId: string, name: string) {
 
 // A non-async factory that returns a Server Action. Next.js only allows async
 // exports in a 'use server' file, so the factory itself is not an action.
-// Regression case from the IdentityProvider benchmark scan (2026-10-25).
+// Regression case from benchmark run 1 (2026-10-25).
 // ok: sentinel-nextjs-handler-missing-auth-check
 export function createRemoveProjectAction(config: { apiUrl: string }) {
   return async function removeProjectAction(projectId: string) {

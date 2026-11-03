@@ -4,10 +4,10 @@
 
 - Milestone number: 4
 - Planned deadline: 2026-11-21
-- Actual completion date: –
-- Status: In progress
+- Actual completion date: 2026-11-02
+- Status: Complete
 - Related Git commits: see [Commits](#commits)
-- Related pull requests: none yet
+- Related pull requests: [#6](https://github.com/Hemanth2709/SentinelRules/pull/6), [#7](https://github.com/Hemanth2709/SentinelRules/pull/7), [HemanthG#4](https://github.com/Hemanth2709/HemanthG/pull/4)
 
 ## Objective
 
@@ -23,9 +23,9 @@ publish the repository.
 | Vulnerable and secure examples | Done – `examples/` |
 | False-positive documentation | Done – [false-positives.md](../false-positives.md), including benchmark observations |
 | Benchmark methodology | Done – [benchmark-methodology.md](../benchmark-methodology.md) |
-| Application scan (authorized) | Done – IdentityProvider (runs 1, 1b; commit SHA and permission record outstanding), Event-Booking-NEST-JS (run 2), HemanthG portfolio (run 3) |
+| Application scan (authorized) | Done – private identity provider (runs 1, 1b; details withheld, employer project), Event-Booking-NEST-JS (run 2), HemanthG portfolio (run 3) |
 | Benchmark report | Done – [benchmark-results.md](../benchmark-results.md): 3 applications, latest runs 3 findings, 0 TP, precision 0% |
-| Public release | Repository is public. Release commit `b6e304d` prepared (CHANGELOG 0.1.0); **`v0.1.0` tag and GitHub release not yet published** (the tag push from the automation session was refused; to be created from the GitHub UI) |
+| Public release | Done – repository is public; [v0.1.0](https://github.com/Hemanth2709/SentinelRules/releases/tag/v0.1.0) published 2026-11-02 on `8cd2a50` (rules, tests and scripts identical to release-prep commit `b6e304d`). Verified by cloning the tag: 8/8 rule files, 16/16 examples |
 | Evidence of successful CI | Done – [run #3](https://github.com/Hemanth2709/SentinelRules/actions/runs/40168233347) on `main` |
 | Integration into portfolio application CI (W6) | Done – [Hemanth2709/HemanthG#4](https://github.com/Hemanth2709/HemanthG/pull/4) adds a workflow running the rule pack (pinned to `b6e304d`) on every push and PR; [scan on `main`](https://github.com/Hemanth2709/HemanthG/actions/runs/41470871160) passed with 0 findings |
 
@@ -38,7 +38,7 @@ rules.
 
 | Step | Result |
 |---|---|
-| Benchmark run 1 (IdentityProvider) | 8 findings, 0 TP, 8 FP, precision 0% |
+| Benchmark run 1 (private identity provider) | 8 findings, 0 TP, 8 FP, precision 0% |
 | Rule fix (Server Action async) | Regression fixture failed before, passes after; 10/10 tests, 16/16 examples |
 | Re-scan after fix (run 1b) | 1 finding (the global-guard FP), as expected |
 | Benchmark run 2 (Event-Booking-NEST-JS, `5c521fd`) | 1 finding, FP (public hello route) |
@@ -53,7 +53,8 @@ See the benchmark section of
 
 ## Decisions
 
-None yet.
+- [DEC-008](../decisions/decision-log.md): details of private projects scanned
+  for the benchmark are generalised in public documentation.
 
 ## Known limitations
 
@@ -65,13 +66,14 @@ CORS, raw SQL, JWT verification).
 
 ## Completion review
 
-- [ ] All required tasks are implemented (open: publish the `v0.1.0` release; IdentityProvider commit SHA and permission record).
+- [x] All required tasks are implemented.
 - [x] All required tests pass.
 - [x] Documentation is updated.
 - [x] Relevant implementation logs are updated.
-- [ ] Acceptance criteria are satisfied (public release pending).
+- [x] Acceptance criteria are satisfied.
 - [x] Remaining limitations are recorded.
 
 ## Commits
 
-To be recorded after push.
+- `b3bd36f` – Benchmark runs 2–3, escaped JSON-LD fix, CI action bump, v0.1.0 prep (merged as `b6e304d`)
+- `cda9ac1` – Record portfolio CI integration; correct release status (merged as `8cd2a50`, tagged `v0.1.0`)

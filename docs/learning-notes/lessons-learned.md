@@ -3,7 +3,7 @@
 Recorded during implementation of rules 01–08 and the first benchmark scan on
 2026-10-25.
 
-## From the first benchmark (IdentityProvider)
+## From the first benchmark (private identity provider)
 
 - **All 8 findings were false positives**, and all came from the heuristic
   authorization rules. Fixtures written from the rule author's imagination
