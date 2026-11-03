@@ -14,7 +14,7 @@ applications written in TypeScript/JavaScript.
 
 - **Owner:** Hemanth G ([@Hemanth2709](https://github.com/Hemanth2709))
 - **Repository:** https://github.com/Hemanth2709/SentinelRules (public)
-- **Latest release:** [v0.1.0](https://github.com/Hemanth2709/SentinelRules/releases/tag/v0.1.0) (2026-11-02, commit `8cd2a50`)
+- **Latest release:** v0.1.1 (2026-11-03): SQL `+=` fix from the ground-truth benchmark. Previous: [v0.1.0](https://github.com/Hemanth2709/SentinelRules/releases/tag/v0.1.0) (2026-11-02, commit `8cd2a50`)
 - **License:** MIT
 
 ### Why it exists
@@ -41,18 +41,22 @@ anything claiming to *prove* authorization is correct.
 | 1. Repository and first rule | 2026-10-31 | Complete |
 | 2. Rules 02–05 | 2026-11-08 | Complete |
 | 3. Rules 06–08 and CI | 2026-11-15 | Complete |
-| 4. Benchmark and release | 2026-11-21 | Complete once PR #8 is merged |
+| 4. Benchmark and release | 2026-11-21 | Complete |
 
 - **Rules:** 8 rule files containing 10 rule IDs.
-- **Tests:** 40 `ruleid` (must flag) and 46 `ok` (must not flag) annotations,
+- **Tests:** 47 `ruleid` (must flag) and 47 `ok` (must not flag) annotations,
   all passing with Semgrep 1.180.0.
 - **CI:** green on `main` (GitHub Actions, Linux). The tests have also been
   verified on Windows (Git Bash, Python 3.14).
-- **Benchmark:** 3 applications scanned. Latest runs found 3 findings, all
-  false positives, so precision is **0% on a small sample**. Recall is not
-  measured. Two rule bugs found by the benchmark were fixed with regression
-  tests. **Biggest weakness:** no true positives yet, and 8 of 10 rule IDs
-  have never fired on real code.
+- **Ground-truth benchmark:** a deliberately vulnerable NestJS + Next.js app
+  (separate private repo `Hemanth2709/special-umbrella`) with 26 planted
+  vulnerabilities and 20 safe look-alikes. v0.1.1 reaches **75% precision and
+  65% recall** over the categories the rules cover. Score it with
+  `scripts/score.py` in that repo.
+- **Real applications:** 3 scanned. Latest runs found 3 findings, all false
+  positives. Three rule bugs found by the benchmarks were fixed with
+  regression tests. **Biggest weakness:** no true positives on real code
+  yet, and the authorization heuristics produce the false positives.
 - **Integration:** the owner's portfolio site
   ([Hemanth2709/HemanthG](https://github.com/Hemanth2709/HemanthG)) runs this
   rule pack in its CI on every push (workflow
@@ -218,18 +222,19 @@ Expected output: `All 8 rule files passed.` and 16 `PASS` lines.
 | 1b | Same, after the fix | 1 | 0 | 1 | Remaining FP: a route protected by a global `APP_GUARD` in another file (known limitation) |
 | 2 | [Event-Booking-NEST-JS](https://github.com/Hemanth2709/Event-Booking-NEST-JS) `5c521fd` | 1 | 0 | 1 | Default public `GET /` hello route; controllers mostly empty |
 | 3 | [HemanthG](https://github.com/Hemanth2709/HemanthG) `c0d7ad5` | 1 | 0 | 1 | JSON-LD from static data. Rule now accepts the escaped form; the portfolio was fixed and now scans clean |
+| GT | Ground-truth vulnerable app (26 V / 20 S), v0.1.0 | 19 | 14 | 5 | Precision 74%, recall 61%. Unpredicted miss V-02 (`sql +=` inside `if`) |
+| GT | Same, v0.1.1 | 20 | 15 | 5 | Precision 75%, recall 65%. V-02 fixed; all FPs are public-by-design routes |
 
 ---
 
-## 10. Roadmap / next steps (proposed, not started)
+## 10. Roadmap / next steps
 
 Priority order:
 
-1. **Merge PR #8** (anonymised docs, Milestone 4 marked complete).
+1. ~~Merge PR #8~~ (done).
 2. **Ground-truth benchmark.**
-   - Build a deliberately vulnerable NestJS + Next.js demo app (for example
-     `benchmark/vulnerable-app/`) with a documented list of planted bugs, so
-     precision **and** recall can be measured.
+   - ~~Build a deliberately vulnerable demo app~~ (done:
+     `Hemanth2709/special-umbrella`; see section 9).
    - Scan 10–20 public open-source NestJS/Next.js repos. Report any real bug
      privately to its maintainers.
    - Add a CI job that re-scans pinned repos and fails on unexpected changes.

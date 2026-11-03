@@ -49,7 +49,7 @@ React, Express-style APIs, Prisma, TypeORM, Knex, node-postgres,
 | 08 | [Missing authorization](docs/features/08-missing-authorization/README.md) | `sentinel-nestjs-route-missing-guard` · `sentinel-nextjs-handler-missing-auth-check` | NestJS / Next.js | Potential missing access control (heuristic) | WARNING | Released |
 
 "Released" means the rule is part of
-[v0.1.0](https://github.com/Hemanth2709/SentinelRules/releases/tag/v0.1.0)
+[v0.1.1](https://github.com/Hemanth2709/SentinelRules/releases/tag/v0.1.1)
 and all of its positive and negative fixtures pass with the pinned Semgrep
 version. It does not mean the rule has been validated on real applications:
 see the benchmark section below.
@@ -57,7 +57,7 @@ see the benchmark section below.
 ## Installation
 
 ```bash
-git clone --branch v0.1.0 https://github.com/Hemanth2709/SentinelRules.git
+git clone --branch v0.1.1 https://github.com/Hemanth2709/SentinelRules.git
 cd SentinelRules
 python3 -m venv .venv && source .venv/bin/activate
 pip install semgrep==1.180.0
@@ -156,8 +156,14 @@ Every feature has the same before/after pair in `examples/` and in its
 
 Methodology: [docs/benchmark-methodology.md](docs/benchmark-methodology.md).
 
-Three applications scanned (a NestJS identity provider with a Next.js SDK, a
-NestJS event-booking API, and a Next.js portfolio). Latest runs: **3
+**Ground-truth benchmark:** a deliberately vulnerable NestJS + Next.js app
+with 26 planted vulnerabilities and 20 safe look-alikes. With v0.1.1 the
+rules reach **75% precision and 65% recall** over the categories they cover.
+The first run found one unpredicted miss (`sql +=` inside an `if`), which
+was fixed in v0.1.1.
+
+**Real applications:** three applications scanned (a NestJS identity provider
+with a Next.js SDK, a NestJS event-booking API, and a Next.js portfolio). Latest runs: **3
 findings, 0 true positives, 3 false positives – precision 0% on a small
 sample**. Two benchmark findings exposed rule problems that were fixed with
 regression tests: non-async factories mistaken for Server Actions (7 false

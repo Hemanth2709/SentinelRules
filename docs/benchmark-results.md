@@ -1,6 +1,34 @@
 # Benchmark results
 
-## Summary
+## Ground-truth benchmark (deliberately vulnerable app)
+
+A purpose-built NestJS + Next.js app in a separate, currently private
+repository of the maintainer, with **26 planted vulnerabilities** and **20
+safe look-alikes**. Each one is labelled in the code, and a prediction for
+each was committed before the first scan. Because every answer is known, it
+gives real **precision and recall**. Three planted cases (SSRF, open
+redirect, mass assignment) have no rule yet and are counted only in overall
+recall.
+
+| Rule pack | Findings | TP | FP | Precision | Recall (covered categories) | Recall (all planted) |
+|---|---|---|---|---|---|---|
+| v0.1.0 | 19 | 14 | 5 | 74% | 61% (14/23) | 54% (14/26) |
+| v0.1.1 | 20 | 15 | 5 | 75% | 65% (15/23) | 58% (15/26) |
+
+- **v0.1.0 to v0.1.1:** the benchmark found one miss nobody had predicted,
+  case V-02: `sql += ...` inside an `if`. That was fixed, together with the
+  related `else`, loop and `OR`-clause gaps found while investigating it.
+- **All 5 false positives** are routes and Server Actions that are public by
+  design (login, remember-me, logout, theme), flagged by the authorization
+  heuristics. This matches their documented limitation.
+- **Remaining misses** are all documented limitations, or categories with no
+  rule yet: cross-function SQL, `jwt.decode()`, Fetch-API CORS headers,
+  `endsWith` origin checks, cookie options from a constant, destructured or
+  ambiguous `NEXT_PUBLIC_` names, IDOR, SSRF, open redirect and mass
+  assignment.
+
+## Real applications
+
 
 | Run | Application | Type | Findings | TP | FP | Unresolved |
 |---|---|---|---|---|---|---|
@@ -9,8 +37,8 @@
 | 2 | Event-Booking-NEST-JS (maintainer's own) | NestJS | 1 | 0 | 1 | 0 |
 | 3 | HemanthG portfolio (maintainer's own) | Next.js 15 | 1 | 0 | 1 | 0 |
 
-Across the latest run of each application (1b, 2, 3): **3 findings, 0 true
-positives, 3 false positives – precision 0%.** Recall is not reported: no
+Across the latest run of each real application (1b, 2, 3): **3 findings, 0
+true positives, 3 false positives – precision 0%.** Recall is not reported: no
 defined file set was manually reviewed for missed weaknesses.
 
 Only two rule IDs produced any findings
