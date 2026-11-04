@@ -1,9 +1,12 @@
 name: Code scanning
 
 # Uploads Sentinel Rules findings for examples/vulnerable to GitHub code
-# scanning, so the alerts appear in this repository's Security tab and inline
-# on pull requests. Every alert here is deliberate: those files exist to be
-# flagged. The self-test job checks the action's pass/fail threshold.
+# scanning, so the alerts appear in this repository's Security tab. Every
+# alert here is deliberate: those files exist to be flagged. The upload runs
+# on main only. On a pull request, GitHub's code scanning check fails when
+# new alerts appear in changed code, and here every new vulnerable example is
+# supposed to produce one. The self-test job (all events) checks the action's
+# pass/fail threshold.
 
 on:
   push:
@@ -18,8 +21,7 @@ jobs:
   sarif:
     name: Upload SARIF (vulnerable examples)
     runs-on: ubuntu-latest
-    # Pull requests from forks get a read-only token and cannot upload.
-    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    if: github.event_name != 'pull_request'
     permissions:
       contents: read
       security-events: write
@@ -73,8 +75,12 @@ jobs:
           fi
           python - <<'PY'
           import json
-          ids = {r["ruleId"] for run in json.load(open("vulnerable.sarif"))["runs"] for r in run["results"]}
+          run = json.load(open("vulnerable.sarif"))["runs"][0]
+          ids = {r["ruleId"] for r in run["results"]}
           bad = sorted(i for i in ids if not i.startswith("sentinel-"))
           assert not bad, f"rule IDs not normalised: {bad}"
-          print(f"{len(ids)} distinct rule IDs, all normalised")
+          assert run["tool"]["driver"]["name"] == "Sentinel Rules", run["tool"]["driver"]["name"]
+          missing = [r["id"] for r in run["tool"]["driver"]["rules"] if "security-severity" not in r["properties"]]
+          assert not missing, f"no security-severity: {missing}"
+          print(f"{len(ids)} distinct rule IDs, all normalised, each with security-severity")
           PY

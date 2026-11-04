@@ -88,12 +88,18 @@ without blocking.
 
 ## Code scanning
 
-`code-scanning.yml` runs on pushes to `main`, on pull requests from this
-repository, and manually. It scans `examples/vulnerable` with the local
-action and uploads the SARIF report under the category
-`sentinel-rules-examples`, so the alerts appear under **Security → Code
-scanning** and inline on pull requests. Every alert there is deliberate: the
-vulnerable examples exist to be flagged.
+`code-scanning.yml` scans `examples/vulnerable` with the local action and
+uploads the SARIF report under the category `sentinel-rules-examples`, so the
+alerts appear under **Security → Code scanning**. Every alert there is
+deliberate: the vulnerable examples exist to be flagged.
+
+The upload runs on pushes to `main` and on manual runs, **not on pull
+requests**. On a pull request GitHub adds a code scanning check that fails
+when new alerts appear in changed code. In this repository every new
+vulnerable example is supposed to produce one, so that check would fail on
+every rule PR (it did on PR #10, with 5 intended alerts). In your own
+repository you usually want the opposite: run the action on pull requests so
+new findings are annotated inline and the check blocks the merge.
 
 [`scripts/sarif-postprocess.py`](../scripts/sarif-postprocess.py) prepares the
 report before upload:
@@ -102,6 +108,9 @@ report before upload:
   `sentinel-…`), so alert IDs stay stable wherever the pack is installed;
 - adds GitHub's `security-severity` property from the rule's own level:
   ERROR → 7.5 (High), WARNING → 5.0 (Medium) ([DEC-009](decisions/decision-log.md));
+- reports the tool as "Sentinel Rules" (the engine version is kept in
+  `tool.driver.properties.engine`) and gives each rule a short description
+  with its clean ID;
 - applies the `fail-on` threshold and prints a one-line summary.
 
 The `action-self-test` job checks the threshold: scanning

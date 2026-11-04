@@ -22,10 +22,12 @@ All notable changes are recorded here. The format follows
 - Composite GitHub Action (`action.yml`): scans with the pack, writes SARIF,
   optionally uploads it to GitHub code scanning, and fails at a chosen level
   (`fail-on: error | warning | none`).
-- `scripts/sarif-postprocess.py`: stable `sentinel-…` rule IDs and a
-  `security-severity` per rule (ERROR → High, WARNING → Medium).
+- `scripts/sarif-postprocess.py`: stable `sentinel-…` rule IDs, a
+  `security-severity` per rule (ERROR → High, WARNING → Medium), and the tool
+  reported as "Sentinel Rules".
 - `code-scanning.yml` workflow: uploads findings for `examples/vulnerable` to
-  this repository's code scanning, and self-tests the action's threshold.
+  this repository's code scanning from `main`, and self-tests the action's
+  threshold on every push and pull request.
 
 ## [0.1.1] - 2026-11-03
 

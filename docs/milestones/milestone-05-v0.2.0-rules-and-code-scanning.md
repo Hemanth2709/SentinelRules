@@ -19,7 +19,7 @@ Action, and add rules for the three planted benchmark cases that had no rule
 |---|---|
 | Composite GitHub Action (`action.yml`) with `fail-on` threshold | Done |
 | SARIF post-processing (stable IDs, `security-severity`) and upload | Done – DEC-009 |
-| Code scanning workflow with action self-test | Done – first real run on PR #10 ([run](https://github.com/Hemanth2709/SentinelRules/actions/runs/41773236491)): SARIF upload and self-test passed |
+| Code scanning workflow with action self-test | Done – first real run on PR #10 ([run](https://github.com/Hemanth2709/SentinelRules/actions/runs/41773236491)): SARIF upload and self-test passed. After the rules commit, GitHub's PR code scanning check failed on the 5 intended alerts in the new vulnerable examples, so the upload now runs on `main` only |
 | Rule 09: SSRF (taint) | Done – 8 `ruleid`, 6 `ok` |
 | Rule 10: Open redirect (taint) | Done – 7 `ruleid`, 6 `ok` |
 | Rule 11: Mass assignment (taint) | Done – 7 `ruleid`, 5 `ok` |

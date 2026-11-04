@@ -11,7 +11,10 @@ Usage: sarif-postprocess.py <sarif-file> [--fail-on error|warning|none]
    severity onto GitHub's bands: ERROR -> 7.5 (High), WARNING -> 5.0
    (Medium), anything else -> 3.0 (Low). This mirrors the rule's level; it is
    not a CVSS score.
-3. Exit status: with ``--fail-on error`` the script exits 1 if any result
+3. Names: the tool is reported as "Sentinel Rules" (Semgrep reports itself
+   as "Semgrep OSS"), and each rule's short description uses the clean ID,
+   so alerts in the Security tab name this pack rather than the engine.
+4. Exit status: with ``--fail-on error`` the script exits 1 if any result
    is an ERROR-level finding; ``warning`` fails on ERROR or WARNING; ``none``
    never fails. Prints a one-line summary either way.
 
@@ -45,11 +48,17 @@ def main() -> int:
 
     for run in data.get("runs", []):
         levels: dict[str, str] = {}
-        for rule in run.get("tool", {}).get("driver", {}).get("rules", []):
+        driver = run.get("tool", {}).get("driver", {})
+        engine = f"{driver.get('name', 'Semgrep')} {driver.get('semanticVersion', '')}".strip()
+        driver["name"] = "Sentinel Rules"
+        driver["informationUri"] = "https://github.com/Hemanth2709/SentinelRules"
+        driver.setdefault("properties", {})["engine"] = engine
+        for rule in driver.get("rules", []):
             original = rule.get("id", "")
             rule["id"] = clean_id(original)
             if "name" in rule:
                 rule["name"] = clean_id(rule["name"])
+            rule["shortDescription"] = {"text": f"Sentinel Rules: {rule['id']}"}
             level = rule.get("defaultConfiguration", {}).get("level", "warning")
             levels[rule["id"]] = level
             properties = rule.setdefault("properties", {})

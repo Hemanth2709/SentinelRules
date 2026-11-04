@@ -120,7 +120,8 @@ runs on every push and pull request: install pinned Semgrep → validate rules
 summary.
 [`.github/workflows/code-scanning.yml`](.github/workflows/code-scanning.yml)
 uploads the findings for `examples/vulnerable` to this repository's code
-scanning (every alert there is deliberate) and self-tests the action. See
+scanning from `main` (every alert there is deliberate) and self-tests the
+action on every push and pull request. See
 [docs/ci-cd-guide.md](docs/ci-cd-guide.md), including how to run the pack in
 another repository's CI.
 
