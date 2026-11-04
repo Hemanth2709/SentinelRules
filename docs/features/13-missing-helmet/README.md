@@ -10,7 +10,7 @@
 | Confidence | LOW |
 | CWE | CWE-693, CWE-1021 |
 | OWASP | A05:2021 Security Misconfiguration |
-| Status | Tested (unreleased, planned for v0.3.0) |
+| Status | Released (v0.3.0) |
 
 ## Purpose
 

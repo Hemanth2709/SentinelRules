@@ -8,3 +8,4 @@
 | 2026-10-25 | Excluded options objects containing a spread | Ad-hoc scan showed a false positive when `algorithms` came from a spread | New `verifyWithSpreadOptions` negative fixture | Pass |
 | 2026-10-25 | Wrote feature documentation and examples | Milestone 2 deliverable | `scripts/check-examples.sh` | Pass |
 | 2026-11-04 | Added `sentinel-jwt-decode-without-verify` (WARNING, audit): `jsonwebtoken` `decode()` in a function, method or arrow function that never calls `verify()`/`verifyAsync()` | Documented false negative; benchmark V-06 | Stub failed first; `semgrep --test` pass; benchmark V-06 detected, S-27 (decode then verify) clean | Pass |
+| 2026-11-04 | v0.3.0 changes released (tag on `b946320`) | Milestone 6 | Rule patterns identical to the benchmarked commit `7fe1eef`; `sentinel-jwt-decode-without-verify` gained the A08 OWASP tag in `8ff2f3b` (metadata only) | Released |

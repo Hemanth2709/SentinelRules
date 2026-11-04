@@ -10,7 +10,7 @@
 | Confidence | HIGH |
 | CWE | CWE-942, CWE-346 |
 | OWASP | A05:2021 Security Misconfiguration, A01:2021 Broken Access Control |
-| Status | Released (v0.1.0) |
+| Status | Released (v0.1.0); v0.3.0 additions released in v0.3.0 |
 
 ## Purpose
 

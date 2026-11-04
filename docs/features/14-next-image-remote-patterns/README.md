@@ -10,7 +10,7 @@
 | Confidence | HIGH |
 | CWE | CWE-918, CWE-400 |
 | OWASP | A05:2021 Security Misconfiguration, A10:2021 Server-Side Request Forgery |
-| Status | Tested (unreleased, planned for v0.3.0) |
+| Status | Released (v0.3.0) |
 
 ## Purpose
 

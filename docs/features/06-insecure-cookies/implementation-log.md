@@ -8,3 +8,4 @@
 | 2026-10-25 | Fixed doubled quotes in message | Cosmetic | Direct scan | Fixed |
 | 2026-10-25 | Wrote feature documentation and examples | Milestone 3 deliverable | `scripts/check-examples.sh` | Pass |
 | 2026-11-04 | Options from a `const` object literal declared earlier in the same file or function | Documented false negative; benchmark V-14 | Fixtures failed first, then pass; benchmark V-14 detected, S-28 (secure constant) clean | Pass |
+| 2026-11-04 | v0.3.0 changes released (tag on `b946320`) | Milestone 6 | Rule patterns identical to the benchmarked commit `7fe1eef` | Released |
