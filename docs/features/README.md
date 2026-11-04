@@ -26,3 +26,5 @@ Each rule has its own folder with the same seven documents:
 | 10 | [Open redirect](10-open-redirect/README.md) | `sentinel-open-redirect-user-controlled-url` | Released (v0.2.0) |
 | 11 | [Mass assignment](11-mass-assignment/README.md) | `sentinel-mass-assignment-unfiltered-body` | Released (v0.2.0) |
 | 12 | [Code injection](12-code-injection/README.md) | `sentinel-code-injection-eval-user-input` | Released (v0.2.0) |
+| 13 | [Missing Helmet](13-missing-helmet/README.md) | `sentinel-missing-helmet` | Tested (v0.3.0) |
+| 14 | [Image remotePatterns](14-next-image-remote-patterns/README.md) | `sentinel-next-image-wildcard-remote-pattern` | Tested (v0.3.0) |

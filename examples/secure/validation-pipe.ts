@@ -3,6 +3,7 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { IsEmail, IsString } from 'class-validator';
+import helmet from 'helmet';
 
 declare const AppModule: unknown;
 
@@ -16,6 +17,7 @@ export class UpdateProfileDto {
 
 export async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.use(helmet());
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true, // strip properties without validation decorators

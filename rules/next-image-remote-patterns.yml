@@ -1,0 +1,51 @@
+rules:
+  - id: sentinel-next-image-wildcard-remote-pattern
+    languages:
+      - typescript
+      - javascript
+    severity: WARNING
+    message: >-
+      next.config allows the Next.js image optimizer to fetch images from any
+      host (hostname '*' or '**'). /_next/image then downloads and processes
+      any URL a visitor supplies, so your server can be used as an image
+      proxy to arbitrary hosts and its CPU, bandwidth and cache can be
+      exhausted. List the exact hosts (or your own subdomains, such as
+      '**.example.com') that serve your images.
+    metadata:
+      category: security
+      subcategory:
+        - vuln
+      confidence: HIGH
+      likelihood: MEDIUM
+      impact: MEDIUM
+      technology:
+        - nextjs
+      cwe:
+        - "CWE-918: Server-Side Request Forgery (SSRF)"
+        - "CWE-400: Uncontrolled Resource Consumption"
+      owasp:
+        - "A05:2021 - Security Misconfiguration"
+        - "A10:2021 - Server-Side Request Forgery (SSRF)"
+      references:
+        - https://nextjs.org/docs/app/api-reference/components/image#remotepatterns
+        - https://nextjs.org/docs/app/api-reference/config/next-config-js/images
+        - https://cheatsheetseries.owasp.org/cheatsheets/Server_Side_Request_Forgery_Prevention_Cheat_Sheet.html
+      documentation: docs/features/14-next-image-remote-patterns/README.md
+    patterns:
+      # Only entries of images.remotePatterns.
+      - pattern-inside: |
+          {..., remotePatterns: [...], ...}
+      - pattern-either:
+          # Object form: { protocol, hostname, port, pathname }
+          - patterns:
+              - pattern: |
+                  {..., hostname: "$HOST", ...}
+              - metavariable-regex:
+                  metavariable: $HOST
+                  regex: ^\*{1,2}$
+          # URL form (Next.js 15.3+): new URL('https://**/**')
+          - patterns:
+              - pattern: new URL("$URL")
+              - metavariable-regex:
+                  metavariable: $URL
+                  regex: ^[a-z]+://\*{1,2}(?=[/:]|$)

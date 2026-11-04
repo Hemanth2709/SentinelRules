@@ -1,0 +1,71 @@
+rules:
+  - id: sentinel-missing-helmet
+    languages:
+      - typescript
+      - javascript
+    severity: WARNING
+    message: >-
+      This NestJS or Express app starts listening without registering
+      helmet() in the same function, so responses go out without security
+      headers such as Content-Security-Policy, X-Content-Type-Options,
+      Strict-Transport-Security and X-Frame-Options. Register
+      app.use(helmet()) (or @fastify/helmet on the Fastify adapter) before
+      listen(). If headers are set elsewhere (a reverse proxy, a CDN, or
+      another module), confirm it and suppress with a reason.
+    metadata:
+      category: security
+      subcategory:
+        - audit
+      confidence: LOW
+      likelihood: LOW
+      impact: MEDIUM
+      technology:
+        - nestjs
+        - express
+        - helmet
+      cwe:
+        - "CWE-693: Protection Mechanism Failure"
+        - "CWE-1021: Improper Restriction of Rendered UI Layers or Frames"
+      owasp:
+        - "A05:2021 - Security Misconfiguration"
+      references:
+        - https://docs.nestjs.com/security/helmet
+        - https://expressjs.com/en/advanced/best-practice-security.html#use-helmet
+        - https://cheatsheetseries.owasp.org/cheatsheets/HTTP_Headers_Cheat_Sheet.html
+      documentation: docs/features/13-missing-helmet/README.md
+    patterns:
+      - pattern-either:
+          # NestJS: const app = await NestFactory.create(...); ... app.listen(...)
+          - pattern-inside: |
+              $APP = await NestFactory.create(...);
+              ...
+          - pattern-inside: |
+              $APP = await NestFactory.create<$T>(...);
+              ...
+          # Express: const app = express(); ... app.listen(...)
+          - pattern-inside: |
+              $APP = express();
+              ...
+      - pattern: $APP.listen(...)
+      # helmet registered on the same app earlier in the function.
+      - pattern-not-inside: |
+          $APP.use(helmet(...));
+          ...
+      - pattern-not-inside: |
+          $APP.use(helmet);
+          ...
+      # Fastify adapter: app.register(helmet) / app.register(fastifyHelmet, ...).
+      # Names are listed because a metavariable bound only in a negation
+      # cannot be filtered with metavariable-regex.
+      - pattern-not-inside: |
+          await $X.register(helmet, ...);
+          ...
+      - pattern-not-inside: |
+          await $X.register(fastifyHelmet, ...);
+          ...
+      - pattern-not-inside: |
+          $X.register(helmet, ...);
+          ...
+      - pattern-not-inside: |
+          $X.register(fastifyHelmet, ...);
+          ...

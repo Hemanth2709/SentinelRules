@@ -18,6 +18,8 @@ OWASP categories refer to the OWASP Top 10 **2021**.
 | `sentinel-open-redirect-user-controlled-url` | CWE-601 | A01 Broken Access Control | Redirect to an untrusted site; CWE-601 is listed under A01 in 2021 |
 | `sentinel-mass-assignment-unfiltered-body` | CWE-915 | A08 Software and Data Integrity Failures, A01 Broken Access Control | Client sets object attributes it should not control; A01 because the usual impact is privilege escalation (OWASP API3:2023, broken object property level authorization) |
 | `sentinel-code-injection-eval-user-input` | CWE-95, CWE-94 | A03 Injection | Request data evaluated as code |
+| `sentinel-missing-helmet` | CWE-693, CWE-1021 | A05 Security Misconfiguration | A protection mechanism (security headers) is not applied; CWE-1021 for the missing frame protection |
+| `sentinel-next-image-wildcard-remote-pattern` | CWE-918, CWE-400 | A05 Security Misconfiguration, A10 Server-Side Request Forgery | The image optimizer fetches from any host: a configuration problem (A05) whose effect is server-side requests (CWE-918, A10) and resource use (CWE-400) |
 
 ## Where each CWE sits in the OWASP Top 10 2021 CWE lists
 
@@ -28,6 +30,7 @@ OWASP categories refer to the OWASP Top 10 **2021**.
 | CWE-347 | A02 Cryptographic Failures |
 | CWE-522 | A04 Insecure Design |
 | CWE-614, CWE-942, CWE-1004 | A05 Security Misconfiguration |
+| CWE-693, CWE-1021, CWE-400 | Not in a 2021 Top 10 CWE list; A05 used for the misconfiguration |
 | CWE-306, CWE-346, CWE-613 | A07 Identification and Authentication Failures |
 | CWE-915 | A08 Software and Data Integrity Failures |
 | CWE-918 | A10 Server-Side Request Forgery |
@@ -40,7 +43,7 @@ and A01 for CWE-200). The table above makes the official placement visible.
 ## Review notes
 
 - Mappings were reviewed against the CWE definitions while writing each rule
-  (2026-10-25; rules 09–12 on 2026-11-04). They have not been independently reviewed by a second person.
+  (2026-10-25; rules 09–14 on 2026-11-04). They have not been independently reviewed by a second person.
 - Where a rule detects a *suspicious configuration* rather than a confirmed
   weakness (JWT algorithms, missing authorization), the CWE describes the
   weakness the finding may indicate.

@@ -43,7 +43,7 @@ anything claiming to *prove* authorization is correct.
 | 3. Rules 06–08 and CI | 2026-11-15 | Complete |
 | 4. Benchmark and release | 2026-11-21 | Complete |
 
-- **Rules:** 12 rule files containing 14 rule IDs.
+- **Rules:** 14 rule files containing 16 rule IDs (13 and 14 are on `main`, not yet released).
 - **Tests:** 76 `ruleid` (must flag) and 68 `ok` (must not flag) annotations,
   all passing with Semgrep 1.180.0.
 - **CI:** green on `main` (GitHub Actions, Linux). The tests have also been
@@ -82,6 +82,8 @@ anything claiming to *prove* authorization is correct.
 | 10 | Open redirect (taint) | `sentinel-open-redirect-user-controlled-url` | WARNING | Request data reaching `NextResponse.redirect`, `redirect()`, `Response.redirect`, `res.redirect` or `{ url }` from `@Redirect()`. |
 | 11 | Mass assignment (taint) | `sentinel-mass-assignment-unfiltered-body` | WARNING | A whole request body (or a spread of it) as the value of a Prisma/TypeORM/Sequelize/Mongoose write or `Object.assign`. Picked fields are never a sink; schema `.parse()` sanitizes. |
 | 12 | Code injection (taint) | `sentinel-code-injection-eval-user-input` | ERROR | Request data reaching `eval`, `Function`, string `setTimeout`/`setInterval` or `node:vm`. |
+| 13 | Missing Helmet (audit) | `sentinel-missing-helmet` | WARNING | `NestFactory.create`/`express()` app calling `listen()` with no earlier `app.use(helmet())` or `register(helmet / fastifyHelmet)` in the same function. |
+| 14 | Image remotePatterns | `sentinel-next-image-wildcard-remote-pattern` | WARNING | `images.remotePatterns` entry with hostname `'*'`/`'**'` or `new URL('https://**/...')`. |
 
 Each rule has CWE and OWASP Top 10 (2021) metadata, references, and a
 `documentation` link to `docs/features/NN-name/`.
@@ -129,7 +131,7 @@ semgrep --test --config rules/cors-misconfiguration.yml tests/cors-misconfigurat
 semgrep scan --metrics=off --config rules/ /path/to/app
 ```
 
-Expected output: `All 12 rule files passed.` and 24 `PASS` lines.
+Expected output: `All 14 rule files passed.` and 28 `PASS` lines.
 
 ---
 
@@ -232,6 +234,7 @@ Expected output: `All 12 rule files passed.` and 24 `PASS` lines.
 | GT | Ground-truth vulnerable app (26 V / 20 S), v0.1.0 | 19 | 14 | 5 | Precision 74%, recall 61%. Unpredicted miss V-02 (`sql +=` inside `if`) |
 | GT | Same, v0.1.1 | 20 | 15 | 5 | Precision 75%, recall 65%. V-02 fixed; all FPs are public-by-design routes |
 | GT | Extended app (30 V / 24 S), rules 09–12 (`add589d`) | 27 | 20 | 7 | Precision 74%, recall 67% of all 30. Matched every prediction; 2 new FPs predicted (S-22 inline check, Record-typed DB helper) |
+| GT | Extended app (35 V / 26 S), rules 13–14 (`76cb377`) | 31 | 24 | 7 | Precision 77%, recall 69% of all 35. Matched every prediction; no new FPs |
 
 ---
 
@@ -253,8 +256,8 @@ Priority order:
      09–12 already use it (DEC-010).
    - ~~New rules: SSRF, open redirect, mass assignment, `eval`/`new Function`~~
      (done: rules 09–12, taint mode).
-   - Still open: missing Helmet, overly broad `next.config` image
-     `remotePatterns`.
+   - ~~Missing Helmet, wildcard `next.config` image `remotePatterns`~~
+     (done: rules 13–14).
    - Close the documented gaps in section 8.
 5. **Distribution:**
    - ~~a reusable GitHub Action~~ (done: `action.yml`,

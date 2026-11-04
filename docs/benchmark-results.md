@@ -56,6 +56,24 @@ packs below were scanned on the same app commit.
 Earlier numbers in the first table were measured on the 26/20 version of the
 app and are unchanged.
 
+### v0.3.0 pre-release (2026-11-04)
+
+Seven cases were added for rules 13 and 14 (now **35 planted, 26 safe**): the
+three existing API bootstraps, which genuinely lack helmet, were labelled
+V-31 to V-33; a new bootstrap with helmet (S-25); and a new `next.config.ts`
+with a wildcard host (V-34), an env-var host with a `'**'` fallback (V-35)
+and an exact host (S-26). Predictions were committed before the scan.
+
+| Rule pack | Findings | TP | FP | Precision | Recall (all 35 planted) |
+|---|---|---|---|---|---|
+| v0.2.0 | 27 | 20 | 7 | 74% | 57% (20/35) |
+| `76cb377` (rules 13–14) | 31 | 24 | 7 | 77% | 69% (24/35) |
+
+- **New detections:** V-31, V-32, V-33 and V-34. **No new false positives.**
+- **Expected miss:** V-35 (dynamic hostname), a documented limitation.
+- **No differences from the predictions.**
+- **Portfolio re-scanned with all 16 rules:** 0 findings.
+
 ## Real applications
 
 
