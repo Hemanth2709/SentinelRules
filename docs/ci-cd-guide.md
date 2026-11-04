@@ -50,7 +50,7 @@ jobs:
       security-events: write   # only needed with upload-sarif: "true"
     steps:
       - uses: actions/checkout@v5
-      - uses: Hemanth2709/SentinelRules@<release tag or commit SHA>
+      - uses: Hemanth2709/SentinelRules@v0.2.0
         with:
           path: .                # what to scan
           fail-on: error         # error | warning | none
@@ -77,7 +77,7 @@ Without the action, the same scan is two commands:
 - uses: actions/checkout@v5
   with:
     repository: Hemanth2709/SentinelRules
-    ref: v0.1.1          # pin a release so rule changes don't alter your CI unexpectedly
+    ref: v0.2.0          # pin a release so rule changes don't alter your CI unexpectedly
     path: sentinel-rules
 - run: pip install semgrep==1.180.0
 - run: semgrep scan --metrics=off --config sentinel-rules/rules --exclude sentinel-rules --error .

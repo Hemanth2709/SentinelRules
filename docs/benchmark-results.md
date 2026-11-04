@@ -27,7 +27,7 @@ recall; v0.2.0 adds rules for them (see below).
   ambiguous `NEXT_PUBLIC_` names, IDOR, SSRF, open redirect and mass
   assignment.
 
-### v0.2.0 pre-release (2026-11-04)
+### v0.2.0 (2026-11-04)
 
 For v0.2.0 the app was extended to **30 planted vulnerabilities and 24 safe
 look-alikes**: the SSRF, open-redirect and mass-assignment cases moved from
@@ -38,7 +38,7 @@ packs below were scanned on the same app commit.
 | Rule pack | Findings | TP | FP | Precision | Recall (all 30 planted) |
 |---|---|---|---|---|---|
 | v0.1.1 | 20 | 15 | 5 | 75% | 50% (15/30) |
-| `add589d` (rules 09–12) | 27 | 20 | 7 | 74% | 67% (20/30) |
+| v0.2.0 (scanned at `add589d`; rules unchanged in the release) | 27 | 20 | 7 | 74% | 67% (20/30) |
 
 - **New detections:** V-24 (SSRF), V-25 (open redirect), V-26 (mass
   assignment through a `Record<string, unknown>` service parameter), and the

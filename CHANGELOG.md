@@ -5,6 +5,8 @@ All notable changes are recorded here. The format follows
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-04
+
 ### Added
 - Four taint-mode rules (DEC-010), each with fixtures, vulnerable and secure
   examples, and seven feature documents:
@@ -88,6 +90,7 @@ First release.
 - Documentation: guides, per-feature docs, security mappings, benchmark
   methodology, decision log, milestone logs, learning notes.
 
-[Unreleased]: https://github.com/Hemanth2709/SentinelRules/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/Hemanth2709/SentinelRules/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/Hemanth2709/SentinelRules/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/Hemanth2709/SentinelRules/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/Hemanth2709/SentinelRules/releases/tag/v0.1.0

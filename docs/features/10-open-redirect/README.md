@@ -10,7 +10,7 @@
 | Confidence | MEDIUM |
 | CWE | CWE-601 |
 | OWASP | A01:2021 Broken Access Control |
-| Status | Tested (unreleased, planned for v0.2.0) |
+| Status | Released (v0.2.0) |
 
 ## Purpose
 
