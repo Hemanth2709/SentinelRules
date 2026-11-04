@@ -26,6 +26,7 @@ Action, and add rules for the three planted benchmark cases that had no rule
 | Rule 12: Code injection (taint) | Done – 6 `ruleid`, 4 `ok` |
 | Ground-truth benchmark extended (8 new cases, predictions first) | Done – 74% precision, 67% recall (20/30), no differences from predictions; see [benchmark-results.md](../benchmark-results.md) |
 | Missing Helmet, `next.config` image `remotePatterns` | Moved to the next milestone |
+| GitHub Marketplace listing | Done – [Sentinel Rules](https://github.com/marketplace/actions/sentinel-rules), published with the v0.2.0 release (category Security) |
 | Release v0.2.0 | Done – [v0.2.0](https://github.com/Hemanth2709/SentinelRules/releases/tag/v0.2.0) published 2026-11-04 on `3b00ec6`; rules identical to the benchmarked `add589d` |
 
 ## Testing and validation

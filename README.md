@@ -3,6 +3,8 @@
 **Custom security rules for safer code.**
 
 [![Semgrep rule tests](https://github.com/Hemanth2709/SentinelRules/actions/workflows/semgrep-tests.yml/badge.svg)](https://github.com/Hemanth2709/SentinelRules/actions/workflows/semgrep-tests.yml)
+[![GitHub Marketplace](https://img.shields.io/badge/Marketplace-Sentinel%20Rules-blue?logo=github)](https://github.com/marketplace/actions/sentinel-rules)
+[![Latest release](https://img.shields.io/github/v/release/Hemanth2709/SentinelRules)](https://github.com/Hemanth2709/SentinelRules/releases/latest)
 
 Sentinel Rules is an open-source collection of custom [Semgrep](https://semgrep.dev)
 rules that detect common security weaknesses in **NestJS** and **Next.js**
@@ -85,6 +87,8 @@ semgrep scan --metrics=off --config rules/ --sarif --output sentinel.sarif /path
 ```
 
 ### As a GitHub Action
+
+Published on the [GitHub Marketplace](https://github.com/marketplace/actions/sentinel-rules).
 
 ```yaml
 - uses: actions/checkout@v5

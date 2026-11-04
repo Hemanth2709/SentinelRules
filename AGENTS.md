@@ -258,7 +258,9 @@ Priority order:
    - Close the documented gaps in section 8.
 5. **Distribution:**
    - ~~a reusable GitHub Action~~ (done: `action.yml`,
-     `uses: Hemanth2709/SentinelRules@v0.2.0`)
+     `uses: Hemanth2709/SentinelRules@v0.2.0`, listed on the
+     [GitHub Marketplace](https://github.com/marketplace/actions/sentinel-rules)
+     since 2026-11-04)
    - submitting the strongest rules to the Semgrep Registry
    - optional Semgrep `fix:` suggestions for simple cases (keep them
      suggestions, not an auto-fix engine)
