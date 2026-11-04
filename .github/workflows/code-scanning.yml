@@ -52,8 +52,9 @@ jobs:
           fail-on: error
           sarif-file: vulnerable.sarif
 
-      # The secure examples have one known WARNING-level heuristic finding
-      # (a public login route), so fail-on: error must pass.
+      # The secure examples only have WARNING-level authorization-heuristic
+      # findings (a public login route and a public calculator handler), so
+      # fail-on: error must pass.
       - name: Secure examples (expected to pass)
         uses: ./
         with:

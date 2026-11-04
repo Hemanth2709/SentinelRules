@@ -10,7 +10,8 @@
   rule.
 - Intentionally public endpoints not marked with a recognised decorator:
   login, registration, health checks, the default `GET /` hello route
-  (observed on the login routes in `examples/*/insecure-cookies.ts` and in
+  (observed on the login routes in `examples/*/insecure-cookies.ts`, the public
+  calculator `POST` handler in `examples/secure/code-injection.ts`, and in
   benchmark run 2).
 - Webhooks protected by signature verification rather than a session.
 - Next.js handlers protected by `middleware.ts`, a wrapper

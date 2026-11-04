@@ -107,8 +107,8 @@ report before upload:
 The `action-self-test` job checks the threshold: scanning
 `examples/vulnerable` with `fail-on: error` must fail, and scanning
 `examples/secure` with `fail-on: error` must pass. (The secure examples have
-one WARNING-level finding, the public login route, recorded in Rule 08's
-limitations.)
+two WARNING-level authorization-heuristic findings, a public login route and
+a public calculator handler, recorded in Rule 08's limitations.)
 
 ## Evidence
 

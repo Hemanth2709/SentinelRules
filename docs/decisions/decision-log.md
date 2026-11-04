@@ -166,3 +166,25 @@
   level changes its code scanning severity.
 - **Related:** `action.yml`, `.github/workflows/code-scanning.yml`.
 
+### DEC-010: Use taint mode for request-to-sink rules
+
+- **Status:** Accepted
+- **Date:** 2026-11-04
+- **Context:** SSRF, open redirect, mass assignment and code injection are
+  dangerous only when request data reaches a specific call. Rules 01–08
+  match syntax at the call site and cannot tell a constant from a request
+  value.
+- **Decision:** Rules 09–12 use Semgrep taint mode with shared request
+  sources (Next.js/Web API request parsing, Server Action `FormData`,
+  Express `req.*`, NestJS `@Query/@Param/@Body/@Headers` parameters) and
+  rule-specific sinks. Sanitizers are limited to allowlist-style checks by
+  name, constant UPPER_CASE maps, `encodeURIComponent`, and schema parsing
+  for mass assignment.
+- **Reason:** Taint mode removes most false positives from constants and
+  fixed origins while keeping each rule small and testable.
+- **Consequences:** Analysis is still single-file (no cross-file taint), and
+  name-based sanitizers are trusted: a misnamed check silences a finding.
+  Both are recorded in each feature's `limitations.md`. Rules 01 and 05 stay
+  syntactic for now.
+- **Related:** Rules 09–12.
+

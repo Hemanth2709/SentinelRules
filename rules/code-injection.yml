@@ -1,0 +1,86 @@
+rules:
+  - id: sentinel-code-injection-eval-user-input
+    languages:
+      - typescript
+      - javascript
+    severity: ERROR
+    message: >-
+      Code built from the incoming request is executed with eval, new
+      Function, a string passed to setTimeout/setInterval, or node:vm. An
+      attacker can run arbitrary JavaScript on the server with its
+      permissions and secrets. node:vm is not a security sandbox. Never
+      execute request data: parse it as data (JSON.parse), or map a
+      user-supplied key to a fixed set of functions.
+    metadata:
+      category: security
+      subcategory:
+        - vuln
+      confidence: HIGH
+      likelihood: MEDIUM
+      impact: HIGH
+      technology:
+        - nextjs
+        - nestjs
+        - express
+        - nodejs
+      cwe:
+        - "CWE-95: Improper Neutralization of Directives in Dynamically Evaluated Code ('Eval Injection')"
+        - "CWE-94: Improper Control of Generation of Code ('Code Injection')"
+      owasp:
+        - "A03:2021 - Injection"
+      references:
+        - https://cheatsheetseries.owasp.org/cheatsheets/Nodejs_Security_Cheat_Sheet.html#do-not-use-dangerous-functions
+        - https://nodejs.org/api/vm.html#vm-executing-javascript
+        - https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/eval#never_use_direct_eval!
+      documentation: docs/features/12-code-injection/README.md
+    mode: taint
+    pattern-sources:
+      # Next.js / Web API: query string, JSON and form bodies.
+      - pattern: new URL($REQ.url).searchParams.get(...)
+      - pattern: $REQ.nextUrl.searchParams.get(...)
+      - pattern: await $REQ.json()
+      - pattern: (await $REQ.formData()).get(...)
+      # Server Actions: fields of a FormData parameter.
+      - patterns:
+          - pattern-inside: |
+              async function $ACTION(..., $FD: FormData, ...) { ... }
+          - pattern: $FD.get(...)
+      # Express: req.query / req.body / req.params.
+      - pattern: $REQ.query
+      - pattern: $REQ.body
+      - pattern: $REQ.params
+      # NestJS: decorated handler parameters.
+      - patterns:
+          - pattern-either:
+              - pattern-inside: |
+                  $METHOD(..., @$DEC(...) $PARAM, ...) { ... }
+              - pattern-inside: |
+                  $METHOD(..., @$DEC(...) $PARAM: $TYPE, ...) { ... }
+          - pattern: $PARAM
+          - metavariable-regex:
+              metavariable: $DEC
+              regex: ^(Query|Param|Body|Headers)$
+    pattern-sanitizers:
+      # Lookup in a constant map (UPPER_CASE name) yields a trusted value.
+      - patterns:
+          - pattern: $MAP[$KEY]
+          - metavariable-regex:
+              metavariable: $MAP
+              regex: ^[A-Z][A-Z0-9_]*$
+    pattern-sinks:
+      - patterns:
+          - pattern-either:
+              - pattern: eval($CODE)
+              - pattern: new Function(..., $CODE)
+              - pattern: Function(..., $CODE)
+              - pattern: setTimeout($CODE, ...)
+              - pattern: setInterval($CODE, ...)
+              - pattern: vm.runInNewContext($CODE, ...)
+              - pattern: vm.runInThisContext($CODE, ...)
+              - pattern: vm.runInContext($CODE, ...)
+              - pattern: vm.compileFunction($CODE, ...)
+              - pattern: new vm.Script($CODE, ...)
+          - focus-metavariable: $CODE
+          # Functions passed to setTimeout/setInterval are not compiled.
+          - pattern-not: (...) => ...
+          - pattern-not: function (...) { ... }

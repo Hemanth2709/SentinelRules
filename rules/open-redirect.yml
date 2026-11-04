@@ -1,0 +1,102 @@
+rules:
+  - id: sentinel-open-redirect-user-controlled-url
+    languages:
+      - typescript
+      - javascript
+    severity: WARNING
+    message: >-
+      The redirect destination comes from the incoming request. An attacker
+      can send users a link on your domain that forwards them to a site of
+      their choice, which makes phishing and OAuth token theft easier.
+      Redirect only to same-site paths you have validated (starts with a
+      single "/", not "//" or "/\"), or map a user-supplied key to a fixed
+      list of destinations.
+    metadata:
+      category: security
+      subcategory:
+        - vuln
+      confidence: MEDIUM
+      likelihood: MEDIUM
+      impact: MEDIUM
+      technology:
+        - nextjs
+        - nestjs
+        - express
+      cwe:
+        - "CWE-601: URL Redirection to Untrusted Site ('Open Redirect')"
+      owasp:
+        - "A01:2021 - Broken Access Control"
+      references:
+        - https://cheatsheetseries.owasp.org/cheatsheets/Unvalidated_Redirects_and_Forwards_Cheat_Sheet.html
+        - https://nextjs.org/docs/app/api-reference/functions/redirect
+        - https://portswigger.net/kb/issues/00500100_open-redirection-reflected
+      documentation: docs/features/10-open-redirect/README.md
+    mode: taint
+    pattern-sources:
+      # Next.js / Web API: query string, JSON and form bodies.
+      - pattern: new URL($REQ.url).searchParams.get(...)
+      - pattern: $REQ.nextUrl.searchParams.get(...)
+      - pattern: await $REQ.json()
+      - pattern: (await $REQ.formData()).get(...)
+      # Server Actions: fields of a FormData parameter.
+      - patterns:
+          - pattern-inside: |
+              async function $ACTION(..., $FD: FormData, ...) { ... }
+          - pattern: $FD.get(...)
+      # Express: req.query / req.body / req.params.
+      - pattern: $REQ.query
+      - pattern: $REQ.body
+      - pattern: $REQ.params
+      # NestJS: decorated handler parameters.
+      - patterns:
+          - pattern-either:
+              - pattern-inside: |
+                  $METHOD(..., @$DEC(...) $PARAM, ...) { ... }
+              - pattern-inside: |
+                  $METHOD(..., @$DEC(...) $PARAM: $TYPE, ...) { ... }
+          - pattern: $PARAM
+          - metavariable-regex:
+              metavariable: $DEC
+              regex: ^(Query|Param|Body|Headers)$
+    pattern-sanitizers:
+      # Checks such as `if (!isSafeRedirect(next)) return ...` clean the
+      # variable they were called with.
+      - by-side-effect: true
+        patterns:
+          - pattern: $CHECK($URL)
+          - focus-metavariable: $URL
+          - metavariable-regex:
+              metavariable: $CHECK
+              # isSafeRedirect, assertSafeRedirect, validateRedirect, isRelativePath, ...
+              regex: (?i)^(is|assert|ensure|validate|check|verify)(safe|allowed|trusted|internal|relative|local|sameorigin)?(redirect|url|path|returnto|destination|target)$
+      # Helpers that return a cleaned path: safeRedirectPath(x), sanitizeRedirect(x).
+      - patterns:
+          - pattern: $HELPER(...)
+          - metavariable-regex:
+              metavariable: $HELPER
+              regex: (?i)^(safe|sanitize|sanitized|normalize|clean)(redirect|url|path|returnto|destination)(path|url)?$
+      # Lookup in a constant map (UPPER_CASE name) yields a trusted value.
+      - patterns:
+          - pattern: $MAP[$KEY]
+          - metavariable-regex:
+              metavariable: $MAP
+              regex: ^[A-Z][A-Z0-9_]*$
+      - pattern: encodeURIComponent(...)
+    pattern-sinks:
+      - patterns:
+          - pattern-either:
+              - pattern: NextResponse.redirect($URL, ...)
+              - pattern: Response.redirect($URL, ...)
+              - pattern: redirect($URL, ...)
+              - pattern: permanentRedirect($URL, ...)
+              - pattern: $RES.redirect($URL)
+              - pattern: $RES.redirect($STATUS, $URL)
+              # NestJS @Redirect(): the returned { url } overrides the default.
+              - patterns:
+                  - pattern-inside: |
+                      @Redirect(...)
+                      $METHOD(...) { ... }
+                  - pattern: "return {..., url: $URL, ...}"
+          - focus-metavariable: $URL
+          # A template literal with a fixed same-site path prefix.
+          - pattern-not: "`/$SEGMENT/...`"

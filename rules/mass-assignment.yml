@@ -1,0 +1,127 @@
+rules:
+  - id: sentinel-mass-assignment-unfiltered-body
+    languages:
+      - typescript
+      - javascript
+    severity: WARNING
+    message: >-
+      The whole client-supplied object is written to the database (passed
+      directly, spread, or merged with Object.assign). A caller can then set
+      fields they should never control, such as role, isAdmin, ownerId or
+      balance. Pick the allowed fields explicitly, or validate the body with
+      a schema or DTO that strips unknown keys before writing it.
+    metadata:
+      category: security
+      subcategory:
+        - vuln
+      confidence: MEDIUM
+      likelihood: MEDIUM
+      impact: HIGH
+      technology:
+        - nextjs
+        - nestjs
+        - express
+        - prisma
+        - typeorm
+      cwe:
+        - "CWE-915: Improperly Controlled Modification of Dynamically-Determined Object Attributes"
+      owasp:
+        - "A08:2021 - Software and Data Integrity Failures"
+        - "A01:2021 - Broken Access Control"
+      references:
+        - https://cheatsheetseries.owasp.org/cheatsheets/Mass_Assignment_Cheat_Sheet.html
+        - https://owasp.org/API-Security/editions/2023/en/0xa3-broken-object-property-level-authorization/
+        - https://docs.nestjs.com/techniques/validation#stripping-properties
+      documentation: docs/features/11-mass-assignment/README.md
+    mode: taint
+    pattern-sources:
+      # Parsed request bodies.
+      - pattern: await $REQ.json()
+      - pattern: $REQ.body
+      # NestJS @Body() with a loose type (any, object, Record). A DTO class is not a
+      # source: with ValidationPipe({ whitelist: true }) unknown keys are
+      # stripped (Rule 03 checks that setting).
+      - patterns:
+          - pattern-either:
+              - pattern-inside: |
+                  $METHOD(..., @Body() $PARAM: any, ...) { ... }
+              - pattern-inside: |
+                  $METHOD(..., @Body() $PARAM: object, ...) { ... }
+              - pattern-inside: |
+                  $METHOD(..., @Body() $PARAM: Record<$K, $V>, ...) { ... }
+          - pattern: $PARAM
+      # Any function parameter typed as a loose record: every key it carries
+      # is written. Typical of service methods called with a request body.
+      - patterns:
+          - pattern-either:
+              - pattern-inside: |
+                  $METHOD(..., $PARAM: Record<$K, $V>, ...) { ... }
+              - pattern-inside: |
+                  function $FN(..., $PARAM: Record<$K, $V>, ...) { ... }
+          - pattern: $PARAM
+    pattern-sanitizers:
+      # Schema validation that returns only declared keys (zod, yup, valibot, ...).
+      - pattern: $SCHEMA.parse(...)
+      - pattern: $SCHEMA.parseAsync(...)
+      - pattern: $SCHEMA.validateSync(...)
+      - pattern: $SCHEMA.safeParse(...).data
+      # Explicit allowlists.
+      - pattern: pick(...)
+      - pattern: $LIB.pick(...)
+    pattern-sinks:
+      # 1. The client object itself is the written value: data: body, save(body).
+      - patterns:
+          - pattern-either:
+              # Prisma: data / create / update keys of a write call.
+              - patterns:
+                  - pattern-either:
+                      - pattern: "$CLIENT.$MODEL.$OP({..., data: $DATA, ...})"
+                      - pattern: "$CLIENT.$MODEL.$OP({..., create: $DATA, ...})"
+                      - pattern: "$CLIENT.$MODEL.$OP({..., update: $DATA, ...})"
+                  - metavariable-regex:
+                      metavariable: $OP
+                      regex: ^(create|createMany|update|updateMany|upsert)$
+              # TypeORM / Sequelize / Mongoose style writes.
+              - pattern: $REPO.update($ID, $DATA)
+              - pattern: $REPO.findByIdAndUpdate($ID, $DATA, ...)
+              - pattern: $REPO.updateOne($FILTER, $DATA, ...)
+              - patterns:
+                  - pattern: $REPO.$WRITE($DATA)
+                  - metavariable-regex:
+                      metavariable: $WRITE
+                      regex: ^(save|insert|create|build|merge)$
+              - pattern: $REPO.merge($ENTITY, $DATA)
+              - pattern: Object.assign($TARGET, $DATA)
+          # Picked fields ({ name: body.name }) are fine; an object literal is
+          # only a sink through a spread (case 2).
+          - metavariable-regex:
+              metavariable: $DATA
+              regex: ^[A-Za-z_$][\w$]*(\.[A-Za-z_$][\w$]*)*$
+          - focus-metavariable: $DATA
+      # 2. The client object is spread into the written value: { ...body, ownerId }.
+      - patterns:
+          - pattern-either:
+              # Prisma: data / create / update keys of a write call.
+              - patterns:
+                  - pattern-either:
+                      - pattern: "$CLIENT.$MODEL.$OP({..., data: $DATA, ...})"
+                      - pattern: "$CLIENT.$MODEL.$OP({..., create: $DATA, ...})"
+                      - pattern: "$CLIENT.$MODEL.$OP({..., update: $DATA, ...})"
+                  - metavariable-regex:
+                      metavariable: $OP
+                      regex: ^(create|createMany|update|updateMany|upsert)$
+              # TypeORM / Sequelize / Mongoose style writes.
+              - pattern: $REPO.update($ID, $DATA)
+              - pattern: $REPO.findByIdAndUpdate($ID, $DATA, ...)
+              - pattern: $REPO.updateOne($FILTER, $DATA, ...)
+              - patterns:
+                  - pattern: $REPO.$WRITE($DATA)
+                  - metavariable-regex:
+                      metavariable: $WRITE
+                      regex: ^(save|insert|create|build|merge)$
+              - pattern: $REPO.merge($ENTITY, $DATA)
+              - pattern: Object.assign($TARGET, $DATA)
+          - metavariable-pattern:
+              metavariable: $DATA
+              pattern: "{..., ...$SPREAD, ...}"
+          - focus-metavariable: $SPREAD
