@@ -1,0 +1,108 @@
+rules:
+  - id: sentinel-sql-injection-tainted-query
+    languages:
+      - typescript
+      - javascript
+    severity: ERROR
+    message: >-
+      Request data reaches raw SQL text here, possibly through variables,
+      string building or helper functions. Pass values as bind parameters
+      (`$1` / `?` with a values array, `:name` in TypeORM, or Prisma's
+      tagged `$queryRaw`), and pick identifiers such as column names from a
+      fixed allowlist.
+    metadata:
+      category: security
+      subcategory:
+        - vuln
+      confidence: MEDIUM
+      likelihood: HIGH
+      impact: HIGH
+      technology:
+        - nodejs
+        - nestjs
+        - nextjs
+      cwe:
+        - "CWE-89: Improper Neutralization of Special Elements used in an SQL Command ('SQL Injection')"
+      owasp:
+        - "A03:2021 - Injection"
+      references:
+        - https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html
+        - https://www.prisma.io/docs/orm/prisma-client/using-raw-sql/raw-queries#sql-injection-prevention
+        - https://typeorm.io/select-query-builder#using-parameters-to-escape-data
+        - https://knexjs.org/guide/raw.html
+      documentation: docs/features/01-sql-injection/README.md
+    mode: taint
+    # Same request-data sources as the other taint rules (09-12).
+    pattern-sources:
+      # Next.js / Web API: query string, JSON and form bodies.
+      - pattern: new URL($REQ.url).searchParams.get(...)
+      - pattern: $REQ.nextUrl.searchParams.get(...)
+      - pattern: await $REQ.json()
+      - pattern: (await $REQ.formData()).get(...)
+      # Server Actions: fields of a FormData parameter.
+      - patterns:
+          - pattern-inside: |
+              async function $ACTION(..., $FD: FormData, ...) { ... }
+          - pattern: $FD.get(...)
+      # Express: req.query / req.body / req.params.
+      - pattern: $REQ.query
+      - pattern: $REQ.body
+      - pattern: $REQ.params
+      # NestJS: decorated handler parameters.
+      - patterns:
+          - pattern-either:
+              - pattern-inside: |
+                  $METHOD(..., @$DEC(...) $PARAM, ...) { ... }
+              - pattern-inside: |
+                  $METHOD(..., @$DEC(...) $PARAM: $TYPE, ...) { ... }
+          - pattern: $PARAM
+          - metavariable-regex:
+              metavariable: $DEC
+              regex: ^(Query|Param|Body|Headers)$
+    pattern-sanitizers:
+      # Numeric conversion leaves no room for SQL syntax.
+      - pattern: Number(...)
+      - pattern: parseInt(...)
+      - pattern: parseFloat(...)
+      - pattern: BigInt(...)
+      # Lookup in a constant map (UPPER_CASE name), e.g. an allowlist of sort columns.
+      - patterns:
+          - pattern: $MAP[$KEY]
+          - metavariable-regex:
+              metavariable: $MAP
+              regex: ^[A-Z][A-Z0-9_]*$
+      # Driver escaping functions.
+      - patterns:
+          - pattern: $F(...)
+          - metavariable-regex:
+              metavariable: $F
+              regex: ^(escape|escapeId|escapeLiteral|escapeIdentifier)$
+      - patterns:
+          - pattern: $OBJ.$F(...)
+          - metavariable-regex:
+              metavariable: $F
+              regex: ^(escape|escapeId|escapeLiteral|escapeIdentifier)$
+    pattern-sinks:
+      # The SQL text argument of raw query methods (not the values array).
+      # `.raw` also covers Prisma.raw() and knex.raw().
+      - patterns:
+          - pattern: $DB.$METHOD($SQL, ...)
+          # SQL interpolated or concatenated directly in the call is already
+          # reported by sentinel-sql-injection-raw-query; don't report it twice.
+          - pattern-not: $DB.$METHOD(`...${$E}...`, ...)
+          - pattern-not: $DB.$METHOD($A + $B, ...)
+          - metavariable-regex:
+              metavariable: $METHOD
+              regex: ^(\$queryRawUnsafe|\$executeRawUnsafe|query|raw|execute)$
+          - focus-metavariable: $SQL
+      # Raw fragments inside ORMs and query builders.
+      - patterns:
+          - pattern-either:
+              - pattern: $SEQ.literal($SQL)
+              - patterns:
+                  - pattern: $QB.$FRAGMENT($SQL, ...)
+                  - metavariable-regex:
+                      metavariable: $FRAGMENT
+                      # knex *Raw helpers; TypeORM query-builder conditions and ordering.
+                      regex: ^(whereRaw|orWhereRaw|andWhereRaw|havingRaw|orHavingRaw|orderByRaw|groupByRaw|joinRaw|fromRaw|where|andWhere|orWhere|having|andHaving|orHaving|orderBy|addOrderBy|groupBy|addGroupBy)$
+          - focus-metavariable: $SQL

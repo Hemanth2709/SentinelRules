@@ -75,3 +75,99 @@ export function manualAllowlistedHeaders(req: Request, res: Response, next: Next
   }
   next();
 }
+
+// ---------------------------------------------------------------------------
+// v0.3.0: Web Fetch API headers (Next.js route handlers, middleware)
+// ---------------------------------------------------------------------------
+
+// Benchmark V-10: the request Origin is reflected together with credentials.
+export function previewHeaders(request: globalThis.Request, response: globalThis.Response) {
+  // ruleid: sentinel-cors-credentials-any-origin
+  response.headers.set('Access-Control-Allow-Origin', request.headers.get('origin') ?? '');
+  response.headers.set('Access-Control-Allow-Credentials', 'true');
+  return response;
+}
+
+export function middlewareHeaders(req: globalThis.Request, headers: Headers) {
+  // ruleid: sentinel-cors-credentials-any-origin
+  headers.set('Access-Control-Allow-Credentials', 'true');
+  headers.set('Access-Control-Allow-Origin', req.headers.get('Origin') as string);
+  return headers;
+}
+
+// Reflected, but without credentials: not this rule's concern.
+export function publicFetchHeaders(request: globalThis.Request, response: globalThis.Response) {
+  // ok: sentinel-cors-credentials-any-origin
+  response.headers.set('Access-Control-Allow-Origin', request.headers.get('origin') ?? '*');
+  return response;
+}
+
+// A fixed origin with credentials is fine.
+export function fixedFetchHeaders(response: globalThis.Response) {
+  // ok: sentinel-cors-credentials-any-origin
+  response.headers.set('Access-Control-Allow-Origin', 'https://app.example.com');
+  response.headers.set('Access-Control-Allow-Credentials', 'true');
+  return response;
+}
+
+// ---------------------------------------------------------------------------
+// sentinel-cors-weak-origin-check (v0.3.0)
+// ---------------------------------------------------------------------------
+
+// Benchmark V-11: 'evil-example.com' also ends with 'example.com'.
+export async function bootstrapSuffix() {
+  const nestApp = await NestFactory.create(AppModule);
+  nestApp.enableCors({
+    origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) =>
+      // ruleid: sentinel-cors-weak-origin-check
+      callback(null, !origin || origin.endsWith('example.com')),
+    credentials: true,
+  });
+}
+
+app.use(
+  cors({
+    origin(origin, callback) {
+      // ruleid: sentinel-cors-weak-origin-check
+      if (origin && origin.includes('example.com')) return callback(null, true);
+      callback(new Error('blocked'));
+    },
+  }),
+);
+
+export function regexCheck(req: Request, res: Response) {
+  const origin = req.headers.origin ?? '';
+  // ruleid: sentinel-cors-weak-origin-check
+  if (/example\.com$/.test(origin)) res.setHeader('Access-Control-Allow-Origin', origin);
+}
+
+export function prefixCheck(req: Request, res: Response) {
+  const origin = req.headers.origin ?? '';
+  // 'https://example.com.attacker.net' starts with this too.
+  // ruleid: sentinel-cors-weak-origin-check
+  if (origin.startsWith('https://example.com')) res.setHeader('Access-Control-Allow-Origin', origin);
+}
+
+// A leading dot limits the match to real subdomains.
+export function dotSuffix(origin: string) {
+  // ok: sentinel-cors-weak-origin-check
+  return origin.endsWith('.example.com') || origin === 'https://example.com';
+}
+
+// Anchored regex.
+export function anchoredRegex(origin: string) {
+  // ok: sentinel-cors-weak-origin-check
+  return /^https:\/\/([a-z0-9-]+\.)?example\.com$/.test(origin);
+}
+
+// Array membership is exact.
+export function exactList(origin: string) {
+  // ok: sentinel-cors-weak-origin-check
+  return allowedOrigins.includes(origin);
+}
+
+// A prefix check that ends at the path separator cannot be extended with a host.
+export function prefixWithSlash(origin: string) {
+  // ok: sentinel-cors-weak-origin-check
+  return `${origin}/`.startsWith('https://example.com/');
+}

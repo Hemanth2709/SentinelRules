@@ -99,3 +99,66 @@ rules:
               - pattern-not: "$J.verify($TOKEN, $KEY, {..., algorithms: $ALGS, ...}, ...)"
               # A spread may supply algorithms from shared options; not inspectable.
               - pattern-not: "$J.verify($TOKEN, $KEY, {..., ...$SPREAD, ...}, ...)"
+
+  - id: sentinel-jwt-decode-without-verify
+    languages:
+      - typescript
+      - javascript
+    severity: WARNING
+    message: >-
+      `$J.decode()` from 'jsonwebtoken' reads a token's claims without
+      checking its signature, and this function never verifies the token.
+      Anyone can forge a token with any claims, so do not use decoded values
+      for authentication or authorization. Use `$J.verify(token, key,
+      { algorithms: [...] })` (or your framework's verifier) and trust only
+      its result.
+    metadata:
+      category: security
+      subcategory:
+        - audit
+      confidence: MEDIUM
+      likelihood: MEDIUM
+      impact: HIGH
+      technology:
+        - nodejs
+        - jsonwebtoken
+      cwe:
+        - "CWE-347: Improper Verification of Cryptographic Signature"
+        - "CWE-345: Insufficient Verification of Data Authenticity"
+      owasp:
+        - "A07:2021 - Identification and Authentication Failures"
+        - "A02:2021 - Cryptographic Failures"
+      references:
+        - https://github.com/auth0/node-jsonwebtoken#jwtdecodetoken--options
+        - https://datatracker.ietf.org/doc/html/rfc8725#section-3.2
+      documentation: docs/features/02-jwt-misconfiguration/README.md
+    patterns:
+      # jsonwebtoken only: other libraries' decode() functions are unrelated.
+      - pattern-either:
+          - pattern-inside: |
+              import $J from 'jsonwebtoken';
+              ...
+          - pattern-inside: |
+              import * as $J from 'jsonwebtoken';
+              ...
+          - pattern-inside: |
+              $J = require('jsonwebtoken');
+              ...
+      - pattern: $J.decode(...)
+      # Decoding first (for example to read the `kid` header) and then
+      # verifying in the same function is the normal, safe pattern. Any
+      # verify call counts: jsonwebtoken, @nestjs/jwt, jose and wrappers.
+      - pattern-not-inside: |
+          function $F(...) { ... <... $V.verify(...) ...>; ... }
+      - pattern-not-inside: |
+          async function $F(...) { ... <... $V.verify(...) ...>; ... }
+      - pattern-not-inside: |
+          $M(...) { ... <... $V.verify(...) ...>; ... }
+      - pattern-not-inside: |
+          async $M(...) { ... <... $V.verify(...) ...>; ... }
+      - pattern-not-inside: |
+          $M(...) { ... <... $V.verifyAsync(...) ...>; ... }
+      - pattern-not-inside: |
+          async $M(...) { ... <... $V.verifyAsync(...) ...>; ... }
+      - pattern-not-inside: |
+          (...) => { ... <... $V.verify(...) ...>; ... }

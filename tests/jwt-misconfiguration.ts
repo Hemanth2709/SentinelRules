@@ -104,3 +104,64 @@ export function verifyViaRequire() {
   // ruleid: sentinel-jwt-verify-missing-algorithms
   return jsonwebtoken.verify(token, publicKey, { complete: true });
 }
+
+// ---------------------------------------------------------------------------
+// sentinel-jwt-decode-without-verify (v0.3.0)
+// ---------------------------------------------------------------------------
+
+// Benchmark V-06: decode() trusts the claims of any forged token.
+export function userIdFromToken(token: string): string {
+  // ruleid: sentinel-jwt-decode-without-verify
+  const claims = jwt.decode(token) as { sub?: string } | null;
+  if (!claims?.sub) throw new Error('unauthorized');
+  return claims.sub;
+}
+
+export class SessionReader {
+  read(token: string) {
+    // ruleid: sentinel-jwt-decode-without-verify
+    return jwt.decode(token, { json: true });
+  }
+}
+
+export const roleOf = (token: string) => {
+  // ruleid: sentinel-jwt-decode-without-verify
+  const payload: any = jwt.decode(token);
+  return payload?.role;
+};
+
+// decode() to read the header (kid) before verifying is the normal pattern.
+export function verifyWithKeySet(token: string, keys: Record<string, string>) {
+  // ok: sentinel-jwt-decode-without-verify
+  const header = jwt.decode(token, { complete: true })?.header;
+  const key = keys[header?.kid ?? ''];
+  return jwt.verify(token, key, { algorithms: ['RS256'] });
+}
+
+// Verified inside a try block after decoding.
+export function verifiedClaims(token: string, key: string) {
+  // ok: sentinel-jwt-decode-without-verify
+  const unverified = jwt.decode(token);
+  try {
+    return jwt.verify(token, key, { algorithms: ['HS256'] });
+  } catch {
+    console.warn('rejected token for', (unverified as any)?.sub);
+    return null;
+  }
+}
+
+// Verified with @nestjs/jwt in the same method.
+export class GuardedReader {
+  constructor(private readonly jwtService: { verifyAsync(t: string): Promise<unknown> }) {}
+  async read(token: string) {
+    // ok: sentinel-jwt-decode-without-verify
+    const kid = (jwt.decode(token, { complete: true }) as any)?.header?.kid;
+    return { kid, claims: await this.jwtService.verifyAsync(token) };
+  }
+}
+
+// A different library's decode() is not this rule's concern.
+export function base64(s: string) {
+  // ok: sentinel-jwt-decode-without-verify
+  return decodeURIComponent(s);
+}

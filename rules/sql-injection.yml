@@ -75,6 +75,19 @@ rules:
                       while ($COND) $SQLVAR += $SQLSTR;
                       ...
               - pattern: $DB.$METHOD($SQLVAR, ...)
+          # 3. v0.3.0: the SQL is returned by a helper function declared in
+          #    the same file and called in the query (benchmark V-03).
+          #    Helpers in other modules need the taint rule
+          #    (sentinel-sql-injection-tainted-query).
+          - patterns:
+              - pattern-either:
+                  - pattern-inside: |
+                      function $HELPER(...) { ... return $SQLSTR; }
+                      ...
+                  - pattern-inside: |
+                      const $HELPER = (...) => $SQLSTR;
+                      ...
+              - pattern: $DB.$METHOD($HELPER(...), ...)
       - metavariable-regex:
           metavariable: $METHOD
           regex: ^(\$queryRawUnsafe|\$executeRawUnsafe|query|raw|execute)$

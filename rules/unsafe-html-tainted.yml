@@ -1,0 +1,116 @@
+rules:
+  - id: sentinel-dom-html-sink-user-input
+    languages:
+      - typescript
+      - javascript
+    severity: WARNING
+    message: >-
+      URL or request data is written into HTML here without escaping: a DOM
+      sink (`innerHTML`, `outerHTML`, `insertAdjacentHTML`,
+      `document.write`) or an HTML response. A crafted link can run script
+      in the user's session. Use `textContent` or React rendering for text,
+      sanitize HTML that must stay HTML (DOMPurify, sanitize-html), and
+      escape values interpolated into server-rendered HTML.
+    metadata:
+      category: security
+      subcategory:
+        - vuln
+      confidence: MEDIUM
+      likelihood: MEDIUM
+      impact: HIGH
+      technology:
+        - nodejs
+        - express
+        - nestjs
+        - nextjs
+        - react
+      cwe:
+        - "CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')"
+      owasp:
+        - "A03:2021 - Injection"
+      references:
+        - https://cheatsheetseries.owasp.org/cheatsheets/DOM_based_XSS_Prevention_Cheat_Sheet.html
+        - https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html
+        - https://expressjs.com/en/api.html#res.send
+      documentation: docs/features/05-unsafe-html/README.md
+    mode: taint
+    pattern-sources:
+      # Browser: the URL, the referrer and the window name are attacker-controlled.
+      - pattern-either:
+          - pattern: window.location.$PART
+          - pattern: location.$PART
+          - pattern: document.location.$PART
+          - pattern: document.URL
+          - pattern: document.documentURI
+          - pattern: document.referrer
+          - pattern: window.name
+          # Next.js client components.
+          - pattern: useSearchParams()
+      # Server: the same request-data sources as the other taint rules.
+      - pattern: new URL($REQ.url).searchParams.get(...)
+      - pattern: $REQ.nextUrl.searchParams.get(...)
+      - pattern: await $REQ.json()
+      - pattern: (await $REQ.formData()).get(...)
+      - pattern: $REQ.query
+      - pattern: $REQ.body
+      - pattern: $REQ.params
+      - patterns:
+          - pattern-either:
+              - pattern-inside: |
+                  $METHOD(..., @$DEC(...) $PARAM, ...) { ... }
+              - pattern-inside: |
+                  $METHOD(..., @$DEC(...) $PARAM: $TYPE, ...) { ... }
+          - pattern: $PARAM
+          - metavariable-regex:
+              metavariable: $DEC
+              regex: ^(Query|Param|Body|Headers)$
+    pattern-sanitizers:
+      - pattern: DOMPurify.sanitize(...)
+      - pattern: sanitizeHtml(...)
+      # escapeHtml(), escape(), encode(), he.encode(), sanitize(), ...
+      - patterns:
+          - pattern-either:
+              - pattern: $F(...)
+              - pattern: $OBJ.$F(...)
+          - metavariable-regex:
+              metavariable: $F
+              regex: (?i)^(escape\w*|encode(html|entities)?|sanitize\w*|purify)$
+    pattern-sinks:
+      # Browser DOM sinks.
+      - patterns:
+          - pattern-either:
+              - pattern: $EL.innerHTML = $HTML
+              - pattern: $EL.outerHTML = $HTML
+              - pattern: $EL.insertAdjacentHTML($POS, $HTML)
+              - pattern: document.write($HTML)
+              - pattern: document.writeln($HTML)
+          - focus-metavariable: $HTML
+      # Express sends strings as text/html. Only strings built in the call
+      # (template or concatenation) are sinks; objects are sent as JSON.
+      - patterns:
+          - pattern-either:
+              - pattern: $RES.send(`...`)
+              - pattern: $RES.send($A + $B)
+              - pattern: $RES.write(`...`)
+              - pattern: $RES.end(`...`)
+          - pattern: $RES.$SEND($HTML)
+          - focus-metavariable: $HTML
+      # Any value sent after an explicit HTML content type.
+      - patterns:
+          - pattern: $RES.type($TYPE).send($HTML)
+          - metavariable-regex:
+              metavariable: $TYPE
+              # metavariable-regex is anchored at the start, and string
+              # values keep their quotes: hence the leading `.*`.
+              regex: (?i).*html
+          - focus-metavariable: $HTML
+      # Web Response with an HTML content type.
+      - patterns:
+          - pattern: 'new Response($HTML, {..., headers: {..., $CTKEY: $CT, ...}, ...})'
+          - metavariable-regex:
+              metavariable: $CTKEY
+              regex: (?i).*content-type
+          - metavariable-regex:
+              metavariable: $CT
+              regex: (?i).*text/html
+          - focus-metavariable: $HTML
