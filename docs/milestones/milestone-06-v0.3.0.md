@@ -4,7 +4,7 @@
 
 - Milestone number: 6
 - Started: 2026-11-04
-- Status: In progress
+- Status: Complete (released 2026-11-04)
 
 ## Objective
 
@@ -21,7 +21,7 @@ Finish the v0.2.0 roadmap's remaining rules (missing Helmet, wildcard image
 | Documented gaps in rules 01–08 | Done for 01, 02, 04, 06, 07 (benchmark misses V-03, V-06, V-10, V-11, V-14, V-16, V-17 now detected). 03 and 08 unchanged: their remaining gaps need cross-file analysis (global guards, global pipes) or are IDOR (V-23), which a single-file rule cannot establish |
 | Taint mode for Rules 01 and 05 | Done – `sentinel-sql-injection-tainted-query` (6 `ruleid`, 7 `ok`) and `sentinel-dom-html-sink-user-input` (7 `ruleid`, 6 `ok`); neither reports a line its structural rule already reports |
 | Benchmark for the gap fixes (6 cases, predictions first) | Done – 80% precision, 89% recall (33/37); no differences from predictions |
-| Release v0.3.0 | Ready: release notes drafted; tag to be created from the GitHub UI |
+| Release v0.3.0 | Done – [v0.3.0](https://github.com/Hemanth2709/SentinelRules/releases/tag/v0.3.0), tag on `b946320` (merge of PR #13) |
 
 ## Testing and validation
 

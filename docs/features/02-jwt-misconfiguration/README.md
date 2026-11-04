@@ -10,7 +10,7 @@
 | Confidence | HIGH · LOW |
 | CWE | CWE-613 · CWE-347 |
 | OWASP | A07:2021 · A02:2021, A07:2021 |
-| Status | Released (v0.1.0) |
+| Status | Released (v0.1.0); v0.3.0 additions released in v0.3.0 |
 
 ## Purpose
 

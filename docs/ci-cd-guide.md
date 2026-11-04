@@ -50,7 +50,7 @@ jobs:
       security-events: write   # only needed with upload-sarif: "true"
     steps:
       - uses: actions/checkout@v5
-      - uses: Hemanth2709/SentinelRules@v0.2.0
+      - uses: Hemanth2709/SentinelRules@v0.3.0
         with:
           path: .                # what to scan
           fail-on: error         # error | warning | none

@@ -14,7 +14,7 @@ applications written in TypeScript/JavaScript.
 
 - **Owner:** Hemanth G ([@Hemanth2709](https://github.com/Hemanth2709))
 - **Repository:** https://github.com/Hemanth2709/SentinelRules (public)
-- **Latest release:** [v0.2.0](https://github.com/Hemanth2709/SentinelRules/releases/tag/v0.2.0) (2026-11-04, commit `3b00ec6`): GitHub Action, code scanning, rules 09–12. Previous: v0.1.1 (2026-11-03): SQL `+=` fix from the ground-truth benchmark; [v0.1.0](https://github.com/Hemanth2709/SentinelRules/releases/tag/v0.1.0) (2026-11-02, commit `8cd2a50`)
+- **Latest release:** [v0.3.0](https://github.com/Hemanth2709/SentinelRules/releases/tag/v0.3.0) (2026-11-04, commit `b946320`): rules 13–14, gap fixes in rules 01–07, taint mode for SQL injection and HTML (20 rule IDs). Previous: [v0.2.0](https://github.com/Hemanth2709/SentinelRules/releases/tag/v0.2.0) (2026-11-04, commit `3b00ec6`): GitHub Action, code scanning, rules 09–12; v0.1.1 (2026-11-03): SQL `+=` fix from the ground-truth benchmark; [v0.1.0](https://github.com/Hemanth2709/SentinelRules/releases/tag/v0.1.0) (2026-11-02, commit `8cd2a50`)
 - **License:** MIT
 
 ### Why it exists
@@ -34,7 +34,7 @@ anything claiming to *prove* authorization is correct.
 
 ---
 
-## 2. Current status (as of 2026-11-04)
+## 2. Current status (as of 2026-11-04, after v0.3.0)
 
 | Milestone | Deadline | Status |
 |---|---|---|
@@ -43,17 +43,15 @@ anything claiming to *prove* authorization is correct.
 | 3. Rules 06–08 and CI | 2026-11-15 | Complete |
 | 4. Benchmark and release | 2026-11-21 | Complete |
 
-- **Rules:** 16 rule files containing 20 rule IDs. Rules 13–14, the four
-  v0.3.0 rule IDs and the v0.3.0 coverage changes to rules 01–07 are on
-  `main`, not yet released.
+- **Rules:** 16 rule files containing 20 rule IDs, all released in v0.3.0.
 - **Tests:** 114 `ruleid` (must flag) and 107 `ok` (must not flag)
   annotations, all passing with Semgrep 1.180.0.
 - **CI:** green on `main` (GitHub Actions, Linux). The tests have also been
   verified on Windows (Git Bash, Python 3.14).
 - **Ground-truth benchmark:** a deliberately vulnerable NestJS + Next.js app
   (separate private repo `Hemanth2709/special-umbrella`), now with 30 planted
-  vulnerabilities and 24 safe look-alikes in v0.2.0, now 37 and 30. The rules
-  on `main` reach **80% precision and 89% recall** over all 37 (v0.2.0
+  vulnerabilities and 24 safe look-alikes in v0.2.0, now 37 and 30. v0.3.0
+  reaches **80% precision and 89% recall** over all 37 (v0.2.0
   reached 74% and 67% over 30). Score it with `scripts/score.py` in that
   repo.
 - **Real applications:** 3 scanned. Latest runs found 3 findings, all false
@@ -279,10 +277,10 @@ Priority order:
      (done: rules 13–14).
    - ~~Close the documented gaps in rules 01–07~~ (done for v0.3.0; see
      section 8 for what remains).
-   - **Release v0.3.0** from the GitHub UI.
+   - ~~Release v0.3.0~~ (done, 2026-11-04).
 5. **Distribution:**
    - ~~a reusable GitHub Action~~ (done: `action.yml`,
-     `uses: Hemanth2709/SentinelRules@v0.2.0`, listed on the
+     `uses: Hemanth2709/SentinelRules@v0.3.0`, listed on the
      [GitHub Marketplace](https://github.com/marketplace/actions/sentinel-rules)
      since 2026-11-04)
    - submitting the strongest rules to the Semgrep Registry

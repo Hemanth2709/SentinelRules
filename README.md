@@ -41,27 +41,26 @@ React, Express-style APIs, Prisma, TypeORM, Knex, node-postgres,
 
 | # | Rule | Rule ID(s) | Framework | Security issue | Severity | Status |
 |---|---|---|---|---|---|---|
-| 01 | [SQL injection](docs/features/01-sql-injection/README.md) | `sentinel-sql-injection-raw-query` · `sentinel-sql-injection-tainted-query` | NestJS / Node.js | Unsafe raw SQL construction; request data reaching SQL (taint) | ERROR | Released · Tested (v0.3.0) |
-| 02 | [JWT misconfiguration](docs/features/02-jwt-misconfiguration/README.md) | `sentinel-jwt-ignore-expiration` · `sentinel-jwt-verify-missing-algorithms` · `sentinel-jwt-decode-without-verify` | NestJS / Node.js | Weak JWT verification configuration; claims trusted without verification | ERROR · WARNING · WARNING | Released · Released · Tested (v0.3.0) |
+| 01 | [SQL injection](docs/features/01-sql-injection/README.md) | `sentinel-sql-injection-raw-query` · `sentinel-sql-injection-tainted-query` | NestJS / Node.js | Unsafe raw SQL construction; request data reaching SQL (taint) | ERROR | Released |
+| 02 | [JWT misconfiguration](docs/features/02-jwt-misconfiguration/README.md) | `sentinel-jwt-ignore-expiration` · `sentinel-jwt-verify-missing-algorithms` · `sentinel-jwt-decode-without-verify` | NestJS / Node.js | Weak JWT verification configuration; claims trusted without verification | ERROR · WARNING · WARNING | Released |
 | 03 | [ValidationPipe](docs/features/03-validation-pipe/README.md) | `sentinel-nestjs-validation-pipe-missing-whitelist` | NestJS | Inadequate input-property restrictions | WARNING | Released |
 | 04 | [Public secrets](docs/features/04-next-public-secrets/README.md) | `sentinel-next-public-secret-env` | Next.js | Potential client-side secret exposure | ERROR | Released |
-| 05 | [Unsafe HTML](docs/features/05-unsafe-html/README.md) | `sentinel-react-dangerously-set-inner-html` · `sentinel-dom-html-sink-user-input` | Next.js / React / Express | Potential XSS; URL or request data in DOM sinks and HTML responses (taint) | WARNING | Released · Tested (v0.3.0) |
+| 05 | [Unsafe HTML](docs/features/05-unsafe-html/README.md) | `sentinel-react-dangerously-set-inner-html` · `sentinel-dom-html-sink-user-input` | Next.js / React / Express | Potential XSS; URL or request data in DOM sinks and HTML responses (taint) | WARNING | Released |
 | 06 | [Insecure cookies](docs/features/06-insecure-cookies/README.md) | `sentinel-insecure-session-cookie` | NestJS / Next.js | Missing cookie security attributes | WARNING | Released |
-| 07 | [CORS misconfiguration](docs/features/07-cors-misconfiguration/README.md) | `sentinel-cors-credentials-any-origin` · `sentinel-cors-weak-origin-check` | NestJS / Node.js / Next.js | Overly permissive credentialed CORS; bypassable origin checks | ERROR · WARNING | Released · Tested (v0.3.0) |
+| 07 | [CORS misconfiguration](docs/features/07-cors-misconfiguration/README.md) | `sentinel-cors-credentials-any-origin` · `sentinel-cors-weak-origin-check` | NestJS / Node.js / Next.js | Overly permissive credentialed CORS; bypassable origin checks | ERROR · WARNING | Released |
 | 08 | [Missing authorization](docs/features/08-missing-authorization/README.md) | `sentinel-nestjs-route-missing-guard` · `sentinel-nextjs-handler-missing-auth-check` | NestJS / Next.js | Potential missing access control (heuristic) | WARNING | Released |
 | 09 | [SSRF](docs/features/09-ssrf/README.md) | `sentinel-ssrf-user-controlled-url` | Next.js / NestJS / Express | Request data used as an outbound URL | WARNING | Released |
 | 10 | [Open redirect](docs/features/10-open-redirect/README.md) | `sentinel-open-redirect-user-controlled-url` | Next.js / NestJS / Express | Request data used as a redirect target | WARNING | Released |
 | 11 | [Mass assignment](docs/features/11-mass-assignment/README.md) | `sentinel-mass-assignment-unfiltered-body` | Prisma / TypeORM / Sequelize / Mongoose | Whole request body written to the database | WARNING | Released |
 | 12 | [Code injection](docs/features/12-code-injection/README.md) | `sentinel-code-injection-eval-user-input` | Node.js / Next.js / NestJS | Request data executed with eval, Function or vm | ERROR | Released |
-| 13 | [Missing Helmet](docs/features/13-missing-helmet/README.md) | `sentinel-missing-helmet` | NestJS / Express | App listens without security headers (audit) | WARNING | Tested (v0.3.0) |
-| 14 | [Image remotePatterns](docs/features/14-next-image-remote-patterns/README.md) | `sentinel-next-image-wildcard-remote-pattern` | Next.js | Image optimizer allowed to fetch from any host | WARNING | Tested (v0.3.0) |
+| 13 | [Missing Helmet](docs/features/13-missing-helmet/README.md) | `sentinel-missing-helmet` | NestJS / Express | App listens without security headers (audit) | WARNING | Released |
+| 14 | [Image remotePatterns](docs/features/14-next-image-remote-patterns/README.md) | `sentinel-next-image-wildcard-remote-pattern` | Next.js | Image optimizer allowed to fetch from any host | WARNING | Released |
 
 "Released" means the rule is part of
-[v0.2.0](https://github.com/Hemanth2709/SentinelRules/releases/tag/v0.2.0)
+[v0.3.0](https://github.com/Hemanth2709/SentinelRules/releases/tag/v0.3.0)
 and all of its positive and negative fixtures pass with the pinned Semgrep
-version. "Tested (v0.3.0)" means the same for a rule on `main` that is not yet
-in a release. Rules 01–07 also gained coverage on `main` for v0.3.0 (see
-the [changelog](CHANGELOG.md)). Rules 09–12 and the two v0.3.0 `*-tainted` /
+version. Rules 01–07 gained coverage in v0.3.0 (see the
+[changelog](CHANGELOG.md)). Rules 09–12 and the two v0.3.0 `*-tainted` /
 `*-user-input` rules use taint mode: they follow request data to the
 dangerous call within one file. Released does not mean a rule has been validated on real
 applications:
@@ -70,7 +69,7 @@ see the benchmark section below.
 ## Installation
 
 ```bash
-git clone --branch v0.2.0 https://github.com/Hemanth2709/SentinelRules.git
+git clone --branch v0.3.0 https://github.com/Hemanth2709/SentinelRules.git
 cd SentinelRules
 python3 -m venv .venv && source .venv/bin/activate
 pip install semgrep==1.180.0
@@ -97,7 +96,7 @@ Published on the [GitHub Marketplace](https://github.com/marketplace/actions/sen
 
 ```yaml
 - uses: actions/checkout@v5
-- uses: Hemanth2709/SentinelRules@v0.2.0
+- uses: Hemanth2709/SentinelRules@v0.3.0
   with:
     fail-on: error          # error | warning | none
     upload-sarif: "true"    # needs permissions: security-events: write
@@ -201,8 +200,7 @@ Every feature has the same before/after pair in `examples/` and in its
 Methodology: [docs/benchmark-methodology.md](docs/benchmark-methodology.md).
 
 **Ground-truth benchmark:** a deliberately vulnerable NestJS + Next.js app,
-now with 37 planted vulnerabilities and 30 safe look-alikes. The rules on
-`main` (v0.3.0 candidate) reach **80% precision and 89% recall** over all 37
+now with 37 planted vulnerabilities and 30 safe look-alikes. v0.3.0 reaches **80% precision and 89% recall** over all 37
 planted cases, against 75% and 65% for the rules before the v0.3.0 gap fixes
 on the same app. The remaining misses are IDOR, cross-file SSRF, denylist
 mass assignment and a dynamic image hostname. v0.2.0 reached 74% precision
