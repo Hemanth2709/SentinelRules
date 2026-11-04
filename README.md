@@ -47,23 +47,23 @@ React, Express-style APIs, Prisma, TypeORM, Knex, node-postgres,
 | 06 | [Insecure cookies](docs/features/06-insecure-cookies/README.md) | `sentinel-insecure-session-cookie` | NestJS / Next.js | Missing cookie security attributes | WARNING | Released |
 | 07 | [CORS misconfiguration](docs/features/07-cors-misconfiguration/README.md) | `sentinel-cors-credentials-any-origin` | NestJS / Node.js | Overly permissive credentialed CORS | ERROR | Released |
 | 08 | [Missing authorization](docs/features/08-missing-authorization/README.md) | `sentinel-nestjs-route-missing-guard` · `sentinel-nextjs-handler-missing-auth-check` | NestJS / Next.js | Potential missing access control (heuristic) | WARNING | Released |
-| 09 | [SSRF](docs/features/09-ssrf/README.md) | `sentinel-ssrf-user-controlled-url` | Next.js / NestJS / Express | Request data used as an outbound URL | WARNING | Tested (v0.2.0) |
-| 10 | [Open redirect](docs/features/10-open-redirect/README.md) | `sentinel-open-redirect-user-controlled-url` | Next.js / NestJS / Express | Request data used as a redirect target | WARNING | Tested (v0.2.0) |
-| 11 | [Mass assignment](docs/features/11-mass-assignment/README.md) | `sentinel-mass-assignment-unfiltered-body` | Prisma / TypeORM / Sequelize / Mongoose | Whole request body written to the database | WARNING | Tested (v0.2.0) |
-| 12 | [Code injection](docs/features/12-code-injection/README.md) | `sentinel-code-injection-eval-user-input` | Node.js / Next.js / NestJS | Request data executed with eval, Function or vm | ERROR | Tested (v0.2.0) |
+| 09 | [SSRF](docs/features/09-ssrf/README.md) | `sentinel-ssrf-user-controlled-url` | Next.js / NestJS / Express | Request data used as an outbound URL | WARNING | Released |
+| 10 | [Open redirect](docs/features/10-open-redirect/README.md) | `sentinel-open-redirect-user-controlled-url` | Next.js / NestJS / Express | Request data used as a redirect target | WARNING | Released |
+| 11 | [Mass assignment](docs/features/11-mass-assignment/README.md) | `sentinel-mass-assignment-unfiltered-body` | Prisma / TypeORM / Sequelize / Mongoose | Whole request body written to the database | WARNING | Released |
+| 12 | [Code injection](docs/features/12-code-injection/README.md) | `sentinel-code-injection-eval-user-input` | Node.js / Next.js / NestJS | Request data executed with eval, Function or vm | ERROR | Released |
 
 "Released" means the rule is part of
-[v0.1.1](https://github.com/Hemanth2709/SentinelRules/releases/tag/v0.1.1)
+[v0.2.0](https://github.com/Hemanth2709/SentinelRules/releases/tag/v0.2.0)
 and all of its positive and negative fixtures pass with the pinned Semgrep
-version. "Tested (v0.2.0)" means the same for a rule that is on `main` but not
-yet in a release. Rules 09–12 use taint mode: they follow request data to the
-dangerous call within one file. It does not mean the rule has been validated on real applications:
+version. Rules 09–12 use taint mode: they follow request data to the dangerous call
+within one file. Released does not mean a rule has been validated on real
+applications:
 see the benchmark section below.
 
 ## Installation
 
 ```bash
-git clone --branch v0.1.1 https://github.com/Hemanth2709/SentinelRules.git
+git clone --branch v0.2.0 https://github.com/Hemanth2709/SentinelRules.git
 cd SentinelRules
 python3 -m venv .venv && source .venv/bin/activate
 pip install semgrep==1.180.0
@@ -88,7 +88,7 @@ semgrep scan --metrics=off --config rules/ --sarif --output sentinel.sarif /path
 
 ```yaml
 - uses: actions/checkout@v5
-- uses: Hemanth2709/SentinelRules@<release tag or commit SHA>
+- uses: Hemanth2709/SentinelRules@v0.2.0
   with:
     fail-on: error          # error | warning | none
     upload-sarif: "true"    # needs permissions: security-events: write
@@ -186,9 +186,9 @@ Every feature has the same before/after pair in `examples/` and in its
 Methodology: [docs/benchmark-methodology.md](docs/benchmark-methodology.md).
 
 **Ground-truth benchmark:** a deliberately vulnerable NestJS + Next.js app,
-now with 30 planted vulnerabilities and 24 safe look-alikes. With rules 09–12
-(pre-release) the pack reaches **74% precision and 67% recall** over all 30
-planted cases, up from 50% for v0.1.1 on the same app; every result matched
+now with 30 planted vulnerabilities and 24 safe look-alikes. v0.2.0 reaches
+**74% precision and 67% recall** over all 30 planted cases, up from 50% for
+v0.1.1 on the same app; every result matched
 the predictions recorded before the scan. On the original 26/20 version,
 v0.1.1 reached 75% precision and 65% recall over the categories it covered;
 the first run found one unpredicted miss (`sql +=` inside an `if`), fixed in

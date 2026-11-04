@@ -10,7 +10,7 @@
 | Confidence | MEDIUM |
 | CWE | CWE-915 |
 | OWASP | A08:2021 Software and Data Integrity Failures, A01:2021 Broken Access Control |
-| Status | Tested (unreleased, planned for v0.2.0) |
+| Status | Released (v0.2.0) |
 
 ## Purpose
 

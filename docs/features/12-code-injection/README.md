@@ -10,7 +10,7 @@
 | Confidence | HIGH |
 | CWE | CWE-95, CWE-94 |
 | OWASP | A03:2021 Injection |
-| Status | Tested (unreleased, planned for v0.2.0) |
+| Status | Released (v0.2.0) |
 
 ## Purpose
 

@@ -14,7 +14,7 @@ applications written in TypeScript/JavaScript.
 
 - **Owner:** Hemanth G ([@Hemanth2709](https://github.com/Hemanth2709))
 - **Repository:** https://github.com/Hemanth2709/SentinelRules (public)
-- **Latest release:** v0.1.1 (2026-11-03): SQL `+=` fix from the ground-truth benchmark. Previous: [v0.1.0](https://github.com/Hemanth2709/SentinelRules/releases/tag/v0.1.0) (2026-11-02, commit `8cd2a50`)
+- **Latest release:** [v0.2.0](https://github.com/Hemanth2709/SentinelRules/releases/tag/v0.2.0) (2026-11-04, commit `3b00ec6`): GitHub Action, code scanning, rules 09–12. Previous: v0.1.1 (2026-11-03): SQL `+=` fix from the ground-truth benchmark; [v0.1.0](https://github.com/Hemanth2709/SentinelRules/releases/tag/v0.1.0) (2026-11-02, commit `8cd2a50`)
 - **License:** MIT
 
 ### Why it exists
@@ -43,15 +43,15 @@ anything claiming to *prove* authorization is correct.
 | 3. Rules 06–08 and CI | 2026-11-15 | Complete |
 | 4. Benchmark and release | 2026-11-21 | Complete |
 
-- **Rules:** 12 rule files containing 14 rule IDs (rules 09–12 are on `main`, not yet released).
+- **Rules:** 12 rule files containing 14 rule IDs.
 - **Tests:** 76 `ruleid` (must flag) and 68 `ok` (must not flag) annotations,
   all passing with Semgrep 1.180.0.
 - **CI:** green on `main` (GitHub Actions, Linux). The tests have also been
   verified on Windows (Git Bash, Python 3.14).
 - **Ground-truth benchmark:** a deliberately vulnerable NestJS + Next.js app
-  (separate private repo `Hemanth2709/special-umbrella`) with 26 planted
-  vulnerabilities and 20 safe look-alikes. v0.1.1 reaches **75% precision and
-  65% recall** over the categories the rules cover. Score it with
+  (separate private repo `Hemanth2709/special-umbrella`), now with 30 planted
+  vulnerabilities and 24 safe look-alikes. v0.2.0 reaches **74% precision and
+  67% recall** over all 30 (v0.1.1: 75% and 50% on the same app). Score it with
   `scripts/score.py` in that repo.
 - **Real applications:** 3 scanned. Latest runs found 3 findings, all false
   positives. Three rule bugs found by the benchmarks were fixed with
@@ -257,8 +257,8 @@ Priority order:
      `remotePatterns`.
    - Close the documented gaps in section 8.
 5. **Distribution:**
-   - ~~a reusable GitHub Action~~ (done: `action.yml`; usable by tag once
-     v0.2.0 is released)
+   - ~~a reusable GitHub Action~~ (done: `action.yml`,
+     `uses: Hemanth2709/SentinelRules@v0.2.0`)
    - submitting the strongest rules to the Semgrep Registry
    - optional Semgrep `fix:` suggestions for simple cases (keep them
      suggestions, not an auto-fix engine)

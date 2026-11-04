@@ -10,7 +10,7 @@
 | Confidence | MEDIUM |
 | CWE | CWE-918 |
 | OWASP | A10:2021 Server-Side Request Forgery |
-| Status | Tested (unreleased, planned for v0.2.0) |
+| Status | Released (v0.2.0) |
 
 ## Purpose
 

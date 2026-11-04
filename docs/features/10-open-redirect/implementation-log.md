@@ -6,3 +6,4 @@
 | 2026-11-04 | Added `@Redirect()` to the NestJS `{ url }` case | A returned object is only a redirect under that decorator | Fixture review | Fixture corrected |
 | 2026-11-04 | Created the taint rule | Detect request data reaching redirect destinations | `semgrep --test`; `semgrep scan` for duplicates | Pass, 7 findings, no duplicates |
 | 2026-11-04 | Wrote examples and documentation | v0.2.0 deliverable | `scripts/check-examples.sh` | Pass |
+| 2026-11-04 | Released in v0.2.0 (tag on `3b00ec6`) | Milestone 5 | Rules identical to the benchmarked commit `add589d` | Released |
