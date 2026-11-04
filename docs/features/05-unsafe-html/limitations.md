@@ -15,7 +15,10 @@
 
 - Whole object passed as a variable: `dangerouslySetInnerHTML={props.html}`
   (confirmed in an ad-hoc scan on 2026-10-25).
-- DOM sinks outside React (`innerHTML`, `insertAdjacentHTML`).
+- DOM sinks outside React (`innerHTML`, `insertAdjacentHTML`): covered since
+  v0.3.0 by the taint rule `sentinel-dom-html-sink-user-input` when the
+  value comes from the URL, the referrer, `useSearchParams()` or request data.
+  HTML from an API response or a database is not a source.
 - HTML parsers that render to React elements (`html-react-parser`).
 - Calls named `sanitize` that do not actually sanitize, or DOMPurify with an
   unsafe configuration (e.g. allowing `<script>` or `on*` attributes).
@@ -28,3 +31,17 @@ All findings: provenance of the HTML must be traced by a reviewer.
 
 Whether the HTML is attacker-controlled, or whether a sanitizer's
 configuration is adequate.
+
+## Taint rule (`sentinel-dom-html-sink-user-input`, v0.3.0)
+
+- Sources are the URL (`location.*`, `document.URL`), `document.referrer`,
+  `window.name`, `useSearchParams()` and server request data. Stored XSS
+  (HTML saved earlier and rendered later) has no source here.
+- Express responses are sinks only when the string is built in the call
+  (template or `+`) or after `res.type('html')`, because objects are sent as
+  JSON. A string variable sent with `res.send(variable)` is not reported.
+- Sanitizers are recognised by name (`DOMPurify.sanitize`, `sanitizeHtml`,
+  `escape*`, `encode*`, `sanitize*`, `purify`); whether they really sanitize
+  is not checked.
+- `dangerouslySetInnerHTML` stays with `sentinel-react-dangerously-set-inner-html`;
+  the taint rule does not report it, so the two rules do not overlap.

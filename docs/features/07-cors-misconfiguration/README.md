@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Rule ID | `sentinel-cors-credentials-any-origin` |
+| Rule IDs | `sentinel-cors-credentials-any-origin`, `sentinel-cors-weak-origin-check` (v0.3.0) |
 | Rule file | [`rules/cors-misconfiguration.yml`](../../../rules/cors-misconfiguration.yml) |
 | Test fixture | [`tests/cors-misconfiguration.ts`](../../../tests/cors-misconfiguration.ts) |
 | Examples | [vulnerable](../../../examples/vulnerable/cors-misconfiguration.ts) · [secure](../../../examples/secure/cors-misconfiguration.ts) |

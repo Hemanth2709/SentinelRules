@@ -10,7 +10,10 @@
 
 Confirmed not reported in an ad-hoc scan on 2026-10-25:
 
-- Weak validation: `origin.endsWith('example.com')`, unanchored regexes.
+- Weak validation is covered since v0.3.0 by `sentinel-cors-weak-origin-check`
+  when the checked value is named `origin` (or `requestOrigin`, `reqOrigin`,
+  `originHeader`); checks on differently named variables, or helpers in
+  other modules, are not seen.
 - `origin: '*'` with `credentials: true`. Browsers reject this combination
   for credentialed requests, so it is a broken configuration rather than an
   exploitable one, and is left out of scope.
@@ -18,7 +21,9 @@ Confirmed not reported in an ad-hoc scan on 2026-10-25:
 Not covered:
 
 - Options assembled in variables or other modules.
-- CORS headers set in Next.js middleware, `next.config.js` `headers()`, a
+- Since v0.3.0, Web Fetch API headers (`response.headers.set(...)`) in
+  route handlers and middleware are covered. Still not covered: CORS headers
+  set in `next.config.js` `headers()`, a
   reverse proxy, or API gateway.
 - Allowlists that include `null` or attacker-registrable domains.
 

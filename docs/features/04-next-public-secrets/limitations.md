@@ -14,8 +14,15 @@
 
 Confirmed not reported in an ad-hoc scan on 2026-10-25:
 
-- Ambiguous names: `NEXT_PUBLIC_OPENAI_API_KEY`, `NEXT_PUBLIC_GITHUB_TOKEN`.
-- Destructuring: `const { NEXT_PUBLIC_DB_PASSWORD } = process.env`.
+- Ambiguous names from providers that are not on the list, e.g.
+  `NEXT_PUBLIC_SOMEVENDOR_API_KEY`. Since v0.3.0, keys and tokens named
+  after providers that issue no browser-safe keys (OpenAI, Anthropic,
+  GitHub tokens and others; see the rule) are reported. Generic `API_KEY`
+  and `TOKEN` names stay unreported, because maps, search and analytics
+  providers issue public browser keys.
+- Destructuring is covered since v0.3.0 (`const { NEXT_PUBLIC_X } =
+  process.env`, including renamed properties); `let` and nested
+  destructuring of other objects are not.
 
 Not covered by design:
 

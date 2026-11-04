@@ -38,25 +38,46 @@ rules:
       documentation: docs/features/06-insecure-cookies/README.md
     patterns:
       - pattern-either:
-          # Express / NestJS (@Res() response): res.cookie(name, value, options?)
-          - pattern: $RES.cookie($NAME, $VALUE)
-          - pattern: $RES.cookie($NAME, $VALUE, {...})
-          # Next.js App Router: cookies().set(name, value, options?)
-          - pattern: cookies().set($NAME, $VALUE)
-          - pattern: cookies().set($NAME, $VALUE, {...})
-          - pattern: (await cookies()).set($NAME, $VALUE)
-          - pattern: (await cookies()).set($NAME, $VALUE, {...})
-          # Next.js NextResponse: response.cookies.set(name, value, options?)
-          - pattern: $RESPONSE.cookies.set($NAME, $VALUE)
-          - pattern: $RESPONSE.cookies.set($NAME, $VALUE, {...})
-      - pattern-either:
-          # At least one of the three attributes is missing (or httpOnly is
-          # not literally true).
+          # Options written inline.
           - patterns:
-              - pattern: $OBJ.$SET($NAME, $VALUE, ...)
-              - pattern-not: "$OBJ.$SET($NAME, $VALUE, {..., httpOnly: true, ..., secure: $SECURE, ..., sameSite: $SAMESITE, ...})"
-          # All three are present but Secure is explicitly disabled.
-          - pattern: "$OBJ.$SET($NAME, $VALUE, {..., secure: false, ...})"
+              - pattern-either:
+                  # Express / NestJS (@Res() response): res.cookie(name, value, options?)
+                  - pattern: $RES.cookie($NAME, $VALUE)
+                  - pattern: $RES.cookie($NAME, $VALUE, {...})
+                  # Next.js App Router: cookies().set(name, value, options?)
+                  - pattern: cookies().set($NAME, $VALUE)
+                  - pattern: cookies().set($NAME, $VALUE, {...})
+                  - pattern: (await cookies()).set($NAME, $VALUE)
+                  - pattern: (await cookies()).set($NAME, $VALUE, {...})
+                  # Next.js NextResponse: response.cookies.set(name, value, options?)
+                  - pattern: $RESPONSE.cookies.set($NAME, $VALUE)
+                  - pattern: $RESPONSE.cookies.set($NAME, $VALUE, {...})
+              - pattern-either:
+                  # At least one of the three attributes is missing (or httpOnly is
+                  # not literally true).
+                  - patterns:
+                      - pattern: $OBJ.$SET($NAME, $VALUE, ...)
+                      - pattern-not: "$OBJ.$SET($NAME, $VALUE, {..., httpOnly: true, ..., secure: $SECURE, ..., sameSite: $SAMESITE, ...})"
+                  # All three are present but Secure is explicitly disabled.
+                  - pattern: "$OBJ.$SET($NAME, $VALUE, {..., secure: false, ...})"
+          # v0.3.0: options taken from a `const` object literal declared
+          # earlier in the same file (or function).
+          - patterns:
+              - pattern-inside: |
+                  const $OPTS = $LITERAL;
+                  ...
+              - pattern-either:
+                  - pattern: $RES.cookie($NAME, $VALUE, $OPTS)
+                  - pattern: cookies().set($NAME, $VALUE, $OPTS)
+                  - pattern: (await cookies()).set($NAME, $VALUE, $OPTS)
+                  - pattern: $RESPONSE.cookies.set($NAME, $VALUE, $OPTS)
+              - metavariable-pattern:
+                  metavariable: $LITERAL
+                  pattern-either:
+                    - patterns:
+                        - pattern: "{...}"
+                        - pattern-not: "{..., httpOnly: true, ..., secure: $SECURE, ..., sameSite: $SAMESITE, ...}"
+                    - pattern: "{..., secure: false, ...}"
       # Only cookies whose literal name suggests a session or credential.
       - metavariable-regex:
           metavariable: $NAME

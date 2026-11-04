@@ -37,6 +37,7 @@ scripts/run-tests.sh
 | Date | Semgrep | Result |
 |---|---|---|
 | 2026-10-25 | 1.180.0 | `2/2: ✓ All tests passed` (6 findings, 7 non-findings) |
+| 2026-11-04 | 1.180.0 | v0.3.0: `3/3: ✓ All tests passed`; new `sentinel-jwt-decode-without-verify` 3 findings and 4 non-findings; direct scan 9 findings for 9 `ruleid` lines (no duplicates) |
 
 ## Failures and resolutions
 
@@ -44,3 +45,4 @@ scripts/run-tests.sh
 |---|---|---|
 | 2026-10-25 | `ignoreExpiration` finding was reported on the first line of the multi-line `super({...})` object (line 20) instead of the property line (23). | Added `metavariable-pattern` + `focus-metavariable` so the finding is placed on the value. |
 | 2026-10-25 | Ad-hoc scan showed `jwt.verify(t, k, { ...base, audience })` reported even though `base` contained `algorithms`. | Added a `pattern-not` for options containing a spread, plus the `verifyWithSpreadOptions` negative fixture. |
+| 2026-11-04 | New rule: the fixtures were run against a stub rule first and failed (`ruleid` annotation with no matching findings). | Wrote the real pattern; all fixtures pass. |

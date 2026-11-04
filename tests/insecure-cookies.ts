@@ -85,3 +85,38 @@ export function cacheSet(cache: Map<string, string>) {
   // ok: sentinel-insecure-session-cookie
   cache.set('token', accessToken);
 }
+
+// ---------------------------------------------------------------------------
+// v0.3.0: options from a constant in the same file
+// ---------------------------------------------------------------------------
+
+// Benchmark V-14: shared options with httpOnly false and no Secure/SameSite.
+const REMEMBER_ME_COOKIE_OPTIONS = { httpOnly: false, maxAge: 30 * 24 * 3600 * 1000 };
+const SESSION_COOKIE_OPTIONS = { httpOnly: true, secure: true, sameSite: 'lax' as const, path: '/' };
+const DEV_COOKIE_OPTIONS = { httpOnly: true, secure: false, sameSite: 'lax' as const };
+
+export function rememberMe(res: Response, token: string) {
+  // ruleid: sentinel-insecure-session-cookie
+  res.cookie('remember_token', token, REMEMBER_ME_COOKIE_OPTIONS);
+}
+
+export function devSession(res: Response, token: string) {
+  // ruleid: sentinel-insecure-session-cookie
+  res.cookie('session', token, DEV_COOKIE_OPTIONS);
+}
+
+export async function nextSessionFromConstant(token: string) {
+  // ruleid: sentinel-insecure-session-cookie
+  (await cookies()).set('auth_token', token, REMEMBER_ME_COOKIE_OPTIONS);
+}
+
+export function secureSession(res: Response, token: string) {
+  // ok: sentinel-insecure-session-cookie
+  res.cookie('session', token, SESSION_COOKIE_OPTIONS);
+}
+
+// Not a session-like name.
+export function themeFromConstant(res: Response) {
+  // ok: sentinel-insecure-session-cookie
+  res.cookie('theme', 'dark', REMEMBER_ME_COOKIE_OPTIONS);
+}

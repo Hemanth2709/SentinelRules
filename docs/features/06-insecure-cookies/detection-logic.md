@@ -40,3 +40,16 @@ Rule: [`rules/insecure-cookies.yml`](../../../rules/insecure-cookies.yml)
 - `res.setHeader('Set-Cookie', ...)` written by hand.
 
 These three were confirmed in an ad-hoc scan on 2026-10-25.
+
+## v0.3.0 addition: options from a constant
+
+A second branch matches `res.cookie(name, value, $OPTS)`, `cookies().set`,
+`(await cookies()).set` and `response.cookies.set` when `$OPTS` is a `const`
+declared earlier in the same file or function, and judges the object literal
+it was assigned:
+
+- it is reported when HttpOnly is not literally `true`, or Secure or
+  SameSite is missing;
+- it is also reported when Secure is `false`.
+
+The session-like name check is unchanged.

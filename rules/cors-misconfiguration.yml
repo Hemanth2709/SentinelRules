@@ -62,3 +62,82 @@ rules:
           - metavariable-regex:
               metavariable: $SET
               regex: ^(setHeader|header|set)$
+      # v0.3.0: Web Fetch API headers (Next.js route handlers, middleware),
+      # where the Origin comes from `request.headers.get('origin')`.
+      - patterns:
+          - pattern-either:
+              - pattern: |
+                  $H.$SET("Access-Control-Allow-Origin", <... $REQ.headers.get($O) ...>);
+                  ...
+                  $H2.$SET("Access-Control-Allow-Credentials", "true");
+              - pattern: |
+                  $H2.$SET("Access-Control-Allow-Credentials", "true");
+                  ...
+                  $H.$SET("Access-Control-Allow-Origin", <... $REQ.headers.get($O) ...>);
+          - metavariable-regex:
+              metavariable: $SET
+              regex: ^(set|append)$
+          - metavariable-regex:
+              metavariable: $O
+              regex: (?i)^["'`]origin["'`]$
+
+  - id: sentinel-cors-weak-origin-check
+    languages:
+      - typescript
+      - javascript
+    severity: WARNING
+    message: >-
+      This origin check can be passed by an attacker-registered origin:
+      `endsWith` or `includes` without a leading dot, `startsWith` without a
+      trailing `/`, or a regular expression that is not anchored at both ends
+      (for example `evil-example.com` ends with `example.com`). Compare
+      against an exact allowlist, or anchor the pattern and require a
+      leading dot for subdomains.
+    metadata:
+      category: security
+      subcategory:
+        - vuln
+      confidence: MEDIUM
+      likelihood: MEDIUM
+      impact: MEDIUM
+      technology:
+        - nodejs
+        - express
+        - nestjs
+        - nextjs
+      cwe:
+        - "CWE-346: Origin Validation Error"
+        - "CWE-942: Permissive Cross-domain Policy with Untrusted Domains"
+      owasp:
+        - "A05:2021 - Security Misconfiguration"
+        - "A01:2021 - Broken Access Control"
+      references:
+        - https://portswigger.net/web-security/cors#errors-parsing-origin-headers
+        - https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin
+      documentation: docs/features/07-cors-misconfiguration/README.md
+    patterns:
+      - pattern-either:
+          # Suffix or substring checks without a leading dot.
+          - patterns:
+              - pattern-either:
+                  - pattern: $O.endsWith($S)
+                  - pattern: $O.includes($S)
+              - metavariable-regex:
+                  metavariable: $S
+                  regex: ^["'`][^."'`]
+          # Prefix checks that stop at the host (no trailing slash).
+          - patterns:
+              - pattern: $O.startsWith($S)
+              - metavariable-regex:
+                  metavariable: $S
+                  regex: ^["'`]https?://[^/"'`]+["'`]$
+          # Regular expressions not anchored at both ends.
+          - patterns:
+              - pattern: $RE.test($O)
+              - metavariable-regex:
+                  metavariable: $RE
+                  regex: ^/([^^].*|\^.*[^$])/[a-z]*$
+      # Only values that are clearly the request origin.
+      - metavariable-regex:
+          metavariable: $O
+          regex: (?i)^(origin|requestorigin|reqorigin|originheader)$

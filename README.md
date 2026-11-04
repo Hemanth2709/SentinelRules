@@ -24,7 +24,7 @@ these early, in code review and CI.
 
 ## Objectives
 
-- Fourteen rule features (sixteen rule IDs) for NestJS / Next.js.
+- Fourteen rule features (twenty rule IDs) for NestJS / Next.js.
 - At least two positive and two negative test cases per rule.
 - CWE and OWASP Top 10 2021 mappings.
 - Vulnerable and secure examples with remediation.
@@ -41,13 +41,13 @@ React, Express-style APIs, Prisma, TypeORM, Knex, node-postgres,
 
 | # | Rule | Rule ID(s) | Framework | Security issue | Severity | Status |
 |---|---|---|---|---|---|---|
-| 01 | [SQL injection](docs/features/01-sql-injection/README.md) | `sentinel-sql-injection-raw-query` | NestJS / Node.js | Unsafe raw SQL construction | ERROR | Released |
-| 02 | [JWT misconfiguration](docs/features/02-jwt-misconfiguration/README.md) | `sentinel-jwt-ignore-expiration` · `sentinel-jwt-verify-missing-algorithms` | NestJS / Node.js | Weak JWT verification configuration | ERROR · WARNING | Released |
+| 01 | [SQL injection](docs/features/01-sql-injection/README.md) | `sentinel-sql-injection-raw-query` · `sentinel-sql-injection-tainted-query` | NestJS / Node.js | Unsafe raw SQL construction; request data reaching SQL (taint) | ERROR | Released · Tested (v0.3.0) |
+| 02 | [JWT misconfiguration](docs/features/02-jwt-misconfiguration/README.md) | `sentinel-jwt-ignore-expiration` · `sentinel-jwt-verify-missing-algorithms` · `sentinel-jwt-decode-without-verify` | NestJS / Node.js | Weak JWT verification configuration; claims trusted without verification | ERROR · WARNING · WARNING | Released · Released · Tested (v0.3.0) |
 | 03 | [ValidationPipe](docs/features/03-validation-pipe/README.md) | `sentinel-nestjs-validation-pipe-missing-whitelist` | NestJS | Inadequate input-property restrictions | WARNING | Released |
 | 04 | [Public secrets](docs/features/04-next-public-secrets/README.md) | `sentinel-next-public-secret-env` | Next.js | Potential client-side secret exposure | ERROR | Released |
-| 05 | [Unsafe HTML](docs/features/05-unsafe-html/README.md) | `sentinel-react-dangerously-set-inner-html` | Next.js / React | Potential XSS | WARNING | Released |
+| 05 | [Unsafe HTML](docs/features/05-unsafe-html/README.md) | `sentinel-react-dangerously-set-inner-html` · `sentinel-dom-html-sink-user-input` | Next.js / React / Express | Potential XSS; URL or request data in DOM sinks and HTML responses (taint) | WARNING | Released · Tested (v0.3.0) |
 | 06 | [Insecure cookies](docs/features/06-insecure-cookies/README.md) | `sentinel-insecure-session-cookie` | NestJS / Next.js | Missing cookie security attributes | WARNING | Released |
-| 07 | [CORS misconfiguration](docs/features/07-cors-misconfiguration/README.md) | `sentinel-cors-credentials-any-origin` | NestJS / Node.js | Overly permissive credentialed CORS | ERROR | Released |
+| 07 | [CORS misconfiguration](docs/features/07-cors-misconfiguration/README.md) | `sentinel-cors-credentials-any-origin` · `sentinel-cors-weak-origin-check` | NestJS / Node.js / Next.js | Overly permissive credentialed CORS; bypassable origin checks | ERROR · WARNING | Released · Tested (v0.3.0) |
 | 08 | [Missing authorization](docs/features/08-missing-authorization/README.md) | `sentinel-nestjs-route-missing-guard` · `sentinel-nextjs-handler-missing-auth-check` | NestJS / Next.js | Potential missing access control (heuristic) | WARNING | Released |
 | 09 | [SSRF](docs/features/09-ssrf/README.md) | `sentinel-ssrf-user-controlled-url` | Next.js / NestJS / Express | Request data used as an outbound URL | WARNING | Released |
 | 10 | [Open redirect](docs/features/10-open-redirect/README.md) | `sentinel-open-redirect-user-controlled-url` | Next.js / NestJS / Express | Request data used as a redirect target | WARNING | Released |
@@ -60,8 +60,10 @@ React, Express-style APIs, Prisma, TypeORM, Knex, node-postgres,
 [v0.2.0](https://github.com/Hemanth2709/SentinelRules/releases/tag/v0.2.0)
 and all of its positive and negative fixtures pass with the pinned Semgrep
 version. "Tested (v0.3.0)" means the same for a rule on `main` that is not yet
-in a release. Rules 09–12 use taint mode: they follow request data to the dangerous call
-within one file. Released does not mean a rule has been validated on real
+in a release. Rules 01–07 also gained coverage on `main` for v0.3.0 (see
+the [changelog](CHANGELOG.md)). Rules 09–12 and the two v0.3.0 `*-tainted` /
+`*-user-input` rules use taint mode: they follow request data to the
+dangerous call within one file. Released does not mean a rule has been validated on real
 applications:
 see the benchmark section below.
 
@@ -137,13 +139,17 @@ another repository's CI.
 | Rule ID | CWE | OWASP 2021 |
 |---|---|---|
 | `sentinel-sql-injection-raw-query` | CWE-89 | A03 |
+| `sentinel-sql-injection-tainted-query` | CWE-89 | A03 |
 | `sentinel-jwt-ignore-expiration` | CWE-613 | A07 |
 | `sentinel-jwt-verify-missing-algorithms` | CWE-347 | A02, A07 |
+| `sentinel-jwt-decode-without-verify` | CWE-347, CWE-345 | A07, A02, A08 |
 | `sentinel-nestjs-validation-pipe-missing-whitelist` | CWE-915 | A08, A04 |
 | `sentinel-next-public-secret-env` | CWE-200, CWE-522 | A01, A05 |
 | `sentinel-react-dangerously-set-inner-html` | CWE-79 | A03 |
+| `sentinel-dom-html-sink-user-input` | CWE-79 | A03 |
 | `sentinel-insecure-session-cookie` | CWE-1004, CWE-614, CWE-1275 | A05, A07 |
 | `sentinel-cors-credentials-any-origin` | CWE-942, CWE-346 | A05, A01 |
+| `sentinel-cors-weak-origin-check` | CWE-346, CWE-942 | A05, A01 |
 | `sentinel-nestjs-route-missing-guard` | CWE-862 | A01 |
 | `sentinel-nextjs-handler-missing-auth-check` | CWE-862, CWE-306 | A01, A07 |
 | `sentinel-ssrf-user-controlled-url` | CWE-918 | A10 |
@@ -195,10 +201,13 @@ Every feature has the same before/after pair in `examples/` and in its
 Methodology: [docs/benchmark-methodology.md](docs/benchmark-methodology.md).
 
 **Ground-truth benchmark:** a deliberately vulnerable NestJS + Next.js app,
-now with 30 planted vulnerabilities and 24 safe look-alikes. v0.2.0 reaches
-**74% precision and 67% recall** over all 30 planted cases, up from 50% for
-v0.1.1 on the same app; every result matched
-the predictions recorded before the scan. On the original 26/20 version,
+now with 37 planted vulnerabilities and 30 safe look-alikes. The rules on
+`main` (v0.3.0 candidate) reach **80% precision and 89% recall** over all 37
+planted cases, against 75% and 65% for the rules before the v0.3.0 gap fixes
+on the same app. The remaining misses are IDOR, cross-file SSRF, denylist
+mass assignment and a dynamic image hostname. v0.2.0 reached 74% precision
+and 67% recall on the earlier 30-case version. Every result matched the
+predictions recorded before the scan. On the original 26/20 version,
 v0.1.1 reached 75% precision and 65% recall over the categories it covered;
 the first run found one unpredicted miss (`sql +=` inside an `if`), fixed in
 v0.1.1.

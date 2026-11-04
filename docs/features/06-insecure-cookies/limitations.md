@@ -12,7 +12,9 @@
 
 ## Known false negatives
 
-- Options passed as a variable or from a shared helper.
+- Options from a shared helper, another module, a spread, or a `let`
+  variable. Since v0.3.0, a `const` object literal declared earlier in the
+  same file or function is checked.
 - Cookie names in constants or variables.
 - Next.js object form `cookies().set({ name, value, ... })`.
 - `express-session`, `cookie-session`, `iron-session`, NextAuth cookie

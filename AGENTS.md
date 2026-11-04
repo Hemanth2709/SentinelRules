@@ -34,7 +34,7 @@ anything claiming to *prove* authorization is correct.
 
 ---
 
-## 2. Current status (as of 2026-11-03)
+## 2. Current status (as of 2026-11-04)
 
 | Milestone | Deadline | Status |
 |---|---|---|
@@ -43,16 +43,19 @@ anything claiming to *prove* authorization is correct.
 | 3. Rules 06–08 and CI | 2026-11-15 | Complete |
 | 4. Benchmark and release | 2026-11-21 | Complete |
 
-- **Rules:** 14 rule files containing 16 rule IDs (13 and 14 are on `main`, not yet released).
-- **Tests:** 76 `ruleid` (must flag) and 68 `ok` (must not flag) annotations,
-  all passing with Semgrep 1.180.0.
+- **Rules:** 16 rule files containing 20 rule IDs. Rules 13–14, the four
+  v0.3.0 rule IDs and the v0.3.0 coverage changes to rules 01–07 are on
+  `main`, not yet released.
+- **Tests:** 114 `ruleid` (must flag) and 107 `ok` (must not flag)
+  annotations, all passing with Semgrep 1.180.0.
 - **CI:** green on `main` (GitHub Actions, Linux). The tests have also been
   verified on Windows (Git Bash, Python 3.14).
 - **Ground-truth benchmark:** a deliberately vulnerable NestJS + Next.js app
   (separate private repo `Hemanth2709/special-umbrella`), now with 30 planted
-  vulnerabilities and 24 safe look-alikes. v0.2.0 reaches **74% precision and
-  67% recall** over all 30 (v0.1.1: 75% and 50% on the same app). Score it with
-  `scripts/score.py` in that repo.
+  vulnerabilities and 24 safe look-alikes in v0.2.0, now 37 and 30. The rules
+  on `main` reach **80% precision and 89% recall** over all 37 (v0.2.0
+  reached 74% and 67% over 30). Score it with `scripts/score.py` in that
+  repo.
 - **Real applications:** 3 scanned. Latest runs found 3 findings, all false
   positives. Three rule bugs found by the benchmarks were fixed with
   regression tests. **Biggest weakness:** no true positives on real code
@@ -68,14 +71,18 @@ anything claiming to *prove* authorization is correct.
 
 | # | Feature | Rule ID | Severity | Detects |
 |---|---|---|---|---|
-| 01 | SQL injection | `sentinel-sql-injection-raw-query` | ERROR | `$queryRawUnsafe`, `$executeRawUnsafe`, `.query`, `.raw`, `.execute` called with SQL built by interpolation, `+` or `.concat`, including SQL built in a local variable first. The SQL-keyword check keeps out non-SQL `.query()` calls. |
+| 01 | SQL injection (taint, v0.3.0) | `sentinel-sql-injection-tainted-query` | ERROR | Request data reaching raw SQL through variables, string building or helpers in other modules; also Prisma.raw, Sequelize `literal`, knex `*Raw`, TypeORM query-builder fragments. Skips SQL built directly in the call (the rule below reports it). |
+| 01 | SQL injection | `sentinel-sql-injection-raw-query` | ERROR | `$queryRawUnsafe`, `$executeRawUnsafe`, `.query`, `.raw`, `.execute` called with SQL built by interpolation, `+` or `.concat`, including SQL built in a local variable first, or returned by a helper function in the same file (v0.3.0). The SQL-keyword check keeps out non-SQL `.query()` calls. |
 | 02 | JWT | `sentinel-jwt-ignore-expiration` | ERROR | Any object literal with `ignoreExpiration: true`. |
 | 02 | JWT | `sentinel-jwt-verify-missing-algorithms` | WARNING | `jsonwebtoken` `verify()` without an `algorithms` allowlist. Spread or variable options are not judged. |
+| 02 | JWT (v0.3.0) | `sentinel-jwt-decode-without-verify` | WARNING | `jsonwebtoken` `decode()` in a function with no `verify()`/`verifyAsync()` call. |
 | 03 | ValidationPipe | `sentinel-nestjs-validation-pipe-missing-whitelist` | WARNING | `new ValidationPipe()` or `APP_PIPE useClass: ValidationPipe` without `whitelist: true`. |
-| 04 | Public secrets | `sentinel-next-public-secret-env` | ERROR | A `NEXT_PUBLIC_*` name containing SECRET, PRIVATE, PASSWORD, SERVICE_ROLE, DATABASE_URL and similar. Excludes PUBLISHABLE, PUBLIC_KEY and ANON_KEY. |
+| 04 | Public secrets | `sentinel-next-public-secret-env` | ERROR | A `NEXT_PUBLIC_*` name containing SECRET, PRIVATE, PASSWORD, SERVICE_ROLE, DATABASE_URL and similar. Excludes PUBLISHABLE, PUBLIC_KEY and ANON_KEY. Since v0.3.0 also destructuring from `process.env` and keys/tokens of providers with no browser-safe keys (OpenAI, Anthropic, GitHub tokens, ...). |
 | 05 | Unsafe HTML | `sentinel-react-dangerously-set-inner-html` | WARNING | `{__html: dynamic}` that is not sanitized. Accepts DOMPurify/sanitize-html and escaped JSON-LD `JSON.stringify(x).replace(/</g, ...)`. |
-| 06 | Cookies | `sentinel-insecure-session-cookie` | WARNING | A session-like cookie set without `httpOnly: true`, `secure` (not false) and `sameSite`. Covers `res.cookie`, `cookies().set` and `response.cookies.set`. |
-| 07 | CORS | `sentinel-cors-credentials-any-origin` | ERROR | `origin: true`, or an always-allow/echo origin callback, combined with `credentials: true`, or a reflected `Origin` header plus `Allow-Credentials`. |
+| 05 | DOM and HTML sinks (taint, v0.3.0) | `sentinel-dom-html-sink-user-input` | WARNING | URL/referrer/`useSearchParams()` or request data into `innerHTML`, `outerHTML`, `insertAdjacentHTML`, `document.write`, Express string responses or `text/html` Responses. |
+| 06 | Cookies | `sentinel-insecure-session-cookie` | WARNING | A session-like cookie set without `httpOnly: true`, `secure` (not false) and `sameSite`. Covers `res.cookie`, `cookies().set` and `response.cookies.set`, with inline options or (v0.3.0) a `const` object declared earlier in the same file. |
+| 07 | CORS | `sentinel-cors-credentials-any-origin` | ERROR | `origin: true`, or an always-allow/echo origin callback, combined with `credentials: true`, or a reflected `Origin` header plus `Allow-Credentials` (Express, or Fetch API `headers.set` since v0.3.0). |
+| 07 | CORS (v0.3.0) | `sentinel-cors-weak-origin-check` | WARNING | `origin.endsWith`/`includes` without a leading dot, host-only `startsWith`, or a regex not anchored at both ends. |
 | 08 | Authorization (heuristic) | `sentinel-nestjs-route-missing-guard` | WARNING | A NestJS route with no `@UseGuards` on the method or class and no `@Public()`/`@SkipAuth()`/`@AllowAnonymous()`. |
 | 08 | Authorization (heuristic) | `sentinel-nextjs-handler-missing-auth-check` | WARNING | `POST`/`PUT`/`PATCH`/`DELETE` route handlers and `export async function` Server Actions with no recognised auth call (`getServerSession`, `auth`, `getToken`, `currentUser`, `*.auth.getUser`, ...). |
 | 09 | SSRF (taint) | `sentinel-ssrf-user-controlled-url` | WARNING | Request data reaching the URL of `fetch`, `axios`, `got`, `http(s)` or `this.httpService`. Sanitized by allowlist-named checks, constant maps, `encodeURIComponent`, fixed `https://host/` templates. |
@@ -131,7 +138,7 @@ semgrep --test --config rules/cors-misconfiguration.yml tests/cors-misconfigurat
 semgrep scan --metrics=off --config rules/ /path/to/app
 ```
 
-Expected output: `All 14 rule files passed.` and 28 `PASS` lines.
+Expected output: `All 16 rule files passed.` and 32 `PASS` lines.
 
 ---
 
@@ -198,6 +205,9 @@ Expected output: `All 14 rule files passed.` and 28 `PASS` lines.
 | `export function $F` also matches `export async function` | Use `export async function` where async is required (Server Actions) |
 | A metavariable bound only in a `pattern-not` cannot be used in `metavariable-regex` | List the alternatives explicitly |
 | A bare `pattern-not` cannot be a branch of `pattern-either` | Wrap it in `patterns:` with a positive `pattern` first |
+| `metavariable-regex` is anchored at the **start** of the value, and string values keep their quotes (`'html'`) | Write `(?i).*html`, not `(?i)html`, when matching inside a string |
+| A `metavariable-regex` placed after a `pattern-either` fails for branches that do not bind its metavariable | Put the regex inside the branch that binds it |
+| A rule with no findings at all makes `--test` say "`ruleid` annotation with no YAML rule", not "missed lines" | Expected when showing a stub rule fails first |
 | Annotations inside JSX `{/* ruleid: */}` comments are not read | Use `//` comments outside JSX |
 | Git Bash on Windows often has `python` but not `python3` | Scripts detect either |
 
@@ -215,11 +225,19 @@ Expected output: `All 14 rule files passed.` and 28 `PASS` lines.
   - Pages Router `/api` routes
   - GraphQL resolvers
   - `cookies().set({...})` object form
-  - weak CORS checks such as `origin.endsWith(...)`
   - the `jose` and `fast-jwt` libraries
-  - `Prisma.raw()` misuse
   - `.env` files
-  - destructured `process.env`
+  - IDOR and other authorization logic
+  - global guards and pipes registered in another file
+- **Closed in v0.3.0:**
+  - weak CORS checks (`endsWith` and similar)
+  - Fetch API CORS headers
+  - `jwt.decode()` without verify
+  - `Prisma.raw()` and other ORM raw fragments (taint)
+  - SQL from same-file helpers
+  - destructured `process.env` and provider API keys
+  - cookie options from a constant
+  - DOM sinks (taint)
 
 ---
 
@@ -235,6 +253,7 @@ Expected output: `All 14 rule files passed.` and 28 `PASS` lines.
 | GT | Same, v0.1.1 | 20 | 15 | 5 | Precision 75%, recall 65%. V-02 fixed; all FPs are public-by-design routes |
 | GT | Extended app (30 V / 24 S), rules 09–12 (`add589d`) | 27 | 20 | 7 | Precision 74%, recall 67% of all 30. Matched every prediction; 2 new FPs predicted (S-22 inline check, Record-typed DB helper) |
 | GT | Extended app (35 V / 26 S), rules 13–14 (`76cb377`) | 31 | 24 | 7 | Precision 77%, recall 69% of all 35. Matched every prediction; no new FPs |
+| GT | Extended app (37 V / 30 S), v0.3.0 gap fixes and taint rules (`7fe1eef`) | 41 | 33 | 8 | Precision 80%, recall 89% of all 37 (75% and 65% before these changes on the same app). Matched every prediction; no new FPs from the new rules |
 
 ---
 
@@ -252,13 +271,15 @@ Priority order:
 3. ~~SARIF upload to GitHub code scanning~~ (done: `action.yml`,
    `.github/workflows/code-scanning.yml`, `scripts/sarif-postprocess.py`).
 4. **v0.2.0.**
-   - Taint mode for SQL injection and XSS (request source → sink); rules
-     09–12 already use it (DEC-010).
+   - ~~Taint mode for SQL injection and XSS~~ (done for v0.3.0:
+     `sentinel-sql-injection-tainted-query`, `sentinel-dom-html-sink-user-input`).
    - ~~New rules: SSRF, open redirect, mass assignment, `eval`/`new Function`~~
      (done: rules 09–12, taint mode).
    - ~~Missing Helmet, wildcard `next.config` image `remotePatterns`~~
      (done: rules 13–14).
-   - Close the documented gaps in section 8.
+   - ~~Close the documented gaps in rules 01–07~~ (done for v0.3.0; see
+     section 8 for what remains).
+   - **Release v0.3.0** from the GitHub UI.
 5. **Distribution:**
    - ~~a reusable GitHub Action~~ (done: `action.yml`,
      `uses: Hemanth2709/SentinelRules@v0.2.0`, listed on the

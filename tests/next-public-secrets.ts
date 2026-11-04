@@ -29,6 +29,24 @@ export const nextConfig = {
   },
 };
 
+// v0.3.0: destructured from process.env (benchmark V-16).
+// ruleid: sentinel-next-public-secret-env
+export const { NEXT_PUBLIC_ADMIN_PASSWORD } = process.env;
+
+// ruleid: sentinel-next-public-secret-env
+const { NEXT_PUBLIC_APP_NAME, NEXT_PUBLIC_DB_PASSWORD: dbPassword } = process.env;
+
+// v0.3.0: API keys and tokens from providers that never issue public keys
+// (benchmark V-17). OpenAI and Anthropic keys must stay on the server.
+// ruleid: sentinel-next-public-secret-env
+export const assistantApiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY;
+
+// ruleid: sentinel-next-public-secret-env
+export const claudeKey = process.env.NEXT_PUBLIC_ANTHROPIC_API_KEY;
+
+// ruleid: sentinel-next-public-secret-env
+export const ghToken = process.env.NEXT_PUBLIC_GITHUB_TOKEN;
+
 // ---------------------------------------------------------------------------
 // Expected non-findings
 // ---------------------------------------------------------------------------
@@ -55,3 +73,19 @@ export const serverConfig = {
     NEXT_PUBLIC_SITE_URL: 'https://example.com',
   },
 };
+
+// v0.3.0: destructuring a public name is fine.
+// ok: sentinel-next-public-secret-env
+export const { NEXT_PUBLIC_SITE_NAME } = process.env;
+
+// A generic API key name is still not judged: many providers (maps, search,
+// analytics) issue browser keys restricted by referrer.
+// ok: sentinel-next-public-secret-env
+export const mapsKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+
+// ok: sentinel-next-public-secret-env
+export const searchKey = process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY;
+
+// Destructuring a server-only secret is not this rule's concern.
+// ok: sentinel-next-public-secret-env
+const { OPENAI_API_KEY } = process.env;

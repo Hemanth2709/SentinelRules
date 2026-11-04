@@ -170,3 +170,32 @@ export async function nonSqlQueryMethod(client: { query: (q: string) => unknown 
   // ok: sentinel-sql-injection-raw-query
   return client.query(`{ user(id: "${id}") { name } }`);
 }
+
+// ---------------------------------------------------------------------------
+// v0.3.0: SQL built by a helper function in the same file (benchmark V-03)
+// ---------------------------------------------------------------------------
+
+function buildSearchSql(term: string): string {
+  return `SELECT id, name FROM products WHERE name ILIKE '%${term}%'`;
+}
+
+const buildOrderSql = (id: string) => 'SELECT * FROM orders WHERE id = ' + id;
+
+function buildStaticSql(): string {
+  return 'SELECT id, name FROM products ORDER BY name';
+}
+
+export async function searchViaHelper(term: string) {
+  // ruleid: sentinel-sql-injection-raw-query
+  return dataSource.query(buildSearchSql(term));
+}
+
+export async function orderViaArrowHelper(id: string) {
+  // ruleid: sentinel-sql-injection-raw-query
+  return pool.query(buildOrderSql(id));
+}
+
+export async function staticViaHelper() {
+  // ok: sentinel-sql-injection-raw-query
+  return dataSource.query(buildStaticSql());
+}
