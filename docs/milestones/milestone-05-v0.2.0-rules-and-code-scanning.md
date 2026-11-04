@@ -19,12 +19,12 @@ Action, and add rules for the three planted benchmark cases that had no rule
 |---|---|
 | Composite GitHub Action (`action.yml`) with `fail-on` threshold | Done |
 | SARIF post-processing (stable IDs, `security-severity`) and upload | Done – DEC-009 |
-| Code scanning workflow with action self-test | Done – first real run is PR #10's CI |
+| Code scanning workflow with action self-test | Done – first real run on PR #10 ([run](https://github.com/Hemanth2709/SentinelRules/actions/runs/41773236491)): SARIF upload and self-test passed |
 | Rule 09: SSRF (taint) | Done – 8 `ruleid`, 6 `ok` |
 | Rule 10: Open redirect (taint) | Done – 7 `ruleid`, 6 `ok` |
 | Rule 11: Mass assignment (taint) | Done – 7 `ruleid`, 5 `ok` |
 | Rule 12: Code injection (taint) | Done – 6 `ruleid`, 4 `ok` |
-| Ground-truth benchmark extended (8 new cases, predictions first) | Done – see [benchmark-results.md](../benchmark-results.md) |
+| Ground-truth benchmark extended (8 new cases, predictions first) | Done – 74% precision, 67% recall (20/30), no differences from predictions; see [benchmark-results.md](../benchmark-results.md) |
 | Missing Helmet, `next.config` image `remotePatterns` | Not started |
 | Release v0.2.0 | Not started – created from the GitHub UI after merge |
 

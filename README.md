@@ -184,11 +184,14 @@ Every feature has the same before/after pair in `examples/` and in its
 
 Methodology: [docs/benchmark-methodology.md](docs/benchmark-methodology.md).
 
-**Ground-truth benchmark:** a deliberately vulnerable NestJS + Next.js app
-with 26 planted vulnerabilities and 20 safe look-alikes. With v0.1.1 the
-rules reach **75% precision and 65% recall** over the categories they cover.
-The first run found one unpredicted miss (`sql +=` inside an `if`), which
-was fixed in v0.1.1.
+**Ground-truth benchmark:** a deliberately vulnerable NestJS + Next.js app,
+now with 30 planted vulnerabilities and 24 safe look-alikes. With rules 09–12
+(pre-release) the pack reaches **74% precision and 67% recall** over all 30
+planted cases, up from 50% for v0.1.1 on the same app; every result matched
+the predictions recorded before the scan. On the original 26/20 version,
+v0.1.1 reached 75% precision and 65% recall over the categories it covered;
+the first run found one unpredicted miss (`sql +=` inside an `if`), fixed in
+v0.1.1.
 
 **Real applications:** three applications scanned (a NestJS identity provider
 with a Next.js SDK, a NestJS event-booking API, and a Next.js portfolio). Latest runs: **3

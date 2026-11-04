@@ -231,6 +231,7 @@ Expected output: `All 12 rule files passed.` and 24 `PASS` lines.
 | 3 | [HemanthG](https://github.com/Hemanth2709/HemanthG) `c0d7ad5` | 1 | 0 | 1 | JSON-LD from static data. Rule now accepts the escaped form; the portfolio was fixed and now scans clean |
 | GT | Ground-truth vulnerable app (26 V / 20 S), v0.1.0 | 19 | 14 | 5 | Precision 74%, recall 61%. Unpredicted miss V-02 (`sql +=` inside `if`) |
 | GT | Same, v0.1.1 | 20 | 15 | 5 | Precision 75%, recall 65%. V-02 fixed; all FPs are public-by-design routes |
+| GT | Extended app (30 V / 24 S), rules 09–12 (`add589d`) | 27 | 20 | 7 | Precision 74%, recall 67% of all 30. Matched every prediction; 2 new FPs predicted (S-22 inline check, Record-typed DB helper) |
 
 ---
 
