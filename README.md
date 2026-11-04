@@ -24,7 +24,7 @@ these early, in code review and CI.
 
 ## Objectives
 
-- Twelve rule features (fourteen rule IDs) for NestJS / Next.js.
+- Fourteen rule features (sixteen rule IDs) for NestJS / Next.js.
 - At least two positive and two negative test cases per rule.
 - CWE and OWASP Top 10 2021 mappings.
 - Vulnerable and secure examples with remediation.
@@ -53,11 +53,14 @@ React, Express-style APIs, Prisma, TypeORM, Knex, node-postgres,
 | 10 | [Open redirect](docs/features/10-open-redirect/README.md) | `sentinel-open-redirect-user-controlled-url` | Next.js / NestJS / Express | Request data used as a redirect target | WARNING | Released |
 | 11 | [Mass assignment](docs/features/11-mass-assignment/README.md) | `sentinel-mass-assignment-unfiltered-body` | Prisma / TypeORM / Sequelize / Mongoose | Whole request body written to the database | WARNING | Released |
 | 12 | [Code injection](docs/features/12-code-injection/README.md) | `sentinel-code-injection-eval-user-input` | Node.js / Next.js / NestJS | Request data executed with eval, Function or vm | ERROR | Released |
+| 13 | [Missing Helmet](docs/features/13-missing-helmet/README.md) | `sentinel-missing-helmet` | NestJS / Express | App listens without security headers (audit) | WARNING | Tested (v0.3.0) |
+| 14 | [Image remotePatterns](docs/features/14-next-image-remote-patterns/README.md) | `sentinel-next-image-wildcard-remote-pattern` | Next.js | Image optimizer allowed to fetch from any host | WARNING | Tested (v0.3.0) |
 
 "Released" means the rule is part of
 [v0.2.0](https://github.com/Hemanth2709/SentinelRules/releases/tag/v0.2.0)
 and all of its positive and negative fixtures pass with the pinned Semgrep
-version. Rules 09–12 use taint mode: they follow request data to the dangerous call
+version. "Tested (v0.3.0)" means the same for a rule on `main` that is not yet
+in a release. Rules 09–12 use taint mode: they follow request data to the dangerous call
 within one file. Released does not mean a rule has been validated on real
 applications:
 see the benchmark section below.
@@ -147,6 +150,8 @@ another repository's CI.
 | `sentinel-open-redirect-user-controlled-url` | CWE-601 | A01 |
 | `sentinel-mass-assignment-unfiltered-body` | CWE-915 | A08, A01 |
 | `sentinel-code-injection-eval-user-input` | CWE-95, CWE-94 | A03 |
+| `sentinel-missing-helmet` | CWE-693, CWE-1021 | A05 |
+| `sentinel-next-image-wildcard-remote-pattern` | CWE-918, CWE-400 | A05, A10 |
 
 Rationale: [docs/security-mappings.md](docs/security-mappings.md).
 

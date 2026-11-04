@@ -5,6 +5,18 @@ All notable changes are recorded here. The format follows
 
 ## [Unreleased]
 
+### Added
+- `sentinel-missing-helmet` (CWE-693/1021, A05, audit): a NestJS or Express
+  app that calls `listen()` without registering `helmet()` (or
+  `@fastify/helmet`) earlier in the same function.
+- `sentinel-next-image-wildcard-remote-pattern` (CWE-918/400, A05/A10):
+  `images.remotePatterns` entries in a Next.js config that allow any host
+  (`'*'`, `'**'`, or `new URL('https://**/...')`).
+
+### Changed
+- The secure CORS and ValidationPipe examples now register `helmet()`; the
+  new rule correctly flagged both.
+
 ## [0.2.0] - 2026-11-04
 
 ### Added
