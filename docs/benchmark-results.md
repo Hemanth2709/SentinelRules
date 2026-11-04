@@ -6,9 +6,9 @@ A purpose-built NestJS + Next.js app in a separate, currently private
 repository of the maintainer, with **26 planted vulnerabilities** and **20
 safe look-alikes**. Each one is labelled in the code, and a prediction for
 each was committed before the first scan. Because every answer is known, it
-gives real **precision and recall**. Three planted cases (SSRF, open
-redirect, mass assignment) have no rule yet and are counted only in overall
-recall.
+gives real **precision and recall**. In v0.1.x three planted cases (SSRF, open
+redirect, mass assignment) had no rule and were counted only in overall
+recall; v0.2.0 adds rules for them (see below).
 
 | Rule pack | Findings | TP | FP | Precision | Recall (covered categories) | Recall (all planted) |
 |---|---|---|---|---|---|---|
@@ -26,6 +26,35 @@ recall.
   `endsWith` origin checks, cookie options from a constant, destructured or
   ambiguous `NEXT_PUBLIC_` names, IDOR, SSRF, open redirect and mass
   assignment.
+
+### v0.2.0 pre-release (2026-11-04)
+
+For v0.2.0 the app was extended to **30 planted vulnerabilities and 24 safe
+look-alikes**: the SSRF, open-redirect and mass-assignment cases moved from
+`out-of-scope` to their own categories, and 8 cases were added (V-27 to V-30,
+S-21 to S-24). Predictions for v0.2.0 were committed before the scan. Both
+packs below were scanned on the same app commit.
+
+| Rule pack | Findings | TP | FP | Precision | Recall (all 30 planted) |
+|---|---|---|---|---|---|
+| v0.1.1 | 20 | 15 | 5 | 75% | 50% (15/30) |
+| `add589d` (rules 09–12) | 27 | 20 | 7 | 74% | 67% (20/30) |
+
+- **New detections:** V-24 (SSRF), V-25 (open redirect), V-26 (mass
+  assignment through a `Record<string, unknown>` service parameter), and the
+  new V-27 (`eval` of a query parameter) and V-29 (NestJS SSO callback
+  redirect).
+- **New false positives (2, both predicted):** S-22, an inline same-site
+  check in a ternary that the open-redirect rule does not recognise as a
+  sanitizer; and the in-memory database helper, which writes a
+  `Record<string, unknown>` parameter with `Object.assign` (unlabelled code).
+- **Expected misses:** V-28 (SSRF across a file) and V-30 (rest-destructuring
+  denylist), both documented limitations.
+- **No differences from the predictions.**
+- **Portfolio (run 3 app) re-scanned with all 14 rules:** 0 findings.
+
+Earlier numbers in the first table were measured on the 26/20 version of the
+app and are unchanged.
 
 ## Real applications
 

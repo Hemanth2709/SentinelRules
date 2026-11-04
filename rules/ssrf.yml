@@ -1,0 +1,103 @@
+rules:
+  - id: sentinel-ssrf-user-controlled-url
+    languages:
+      - typescript
+      - javascript
+    severity: WARNING
+    message: >-
+      An outbound HTTP request is made to a URL that comes from the incoming
+      request. An attacker can point the server at internal services, cloud
+      metadata endpoints (169.254.169.254) or other hosts it can reach but
+      the attacker cannot. Keep the scheme and host fixed in code, or check
+      the parsed URL's protocol and hostname against an allowlist before
+      sending the request.
+    metadata:
+      category: security
+      subcategory:
+        - vuln
+      confidence: MEDIUM
+      likelihood: MEDIUM
+      impact: HIGH
+      technology:
+        - nextjs
+        - nestjs
+        - express
+        - axios
+      cwe:
+        - "CWE-918: Server-Side Request Forgery (SSRF)"
+      owasp:
+        - "A10:2021 - Server-Side Request Forgery (SSRF)"
+      references:
+        - https://owasp.org/Top10/A10_2021-Server-Side_Request_Forgery_%28SSRF%29/
+        - https://cheatsheetseries.owasp.org/cheatsheets/Server_Side_Request_Forgery_Prevention_Cheat_Sheet.html
+        - https://portswigger.net/web-security/ssrf
+      documentation: docs/features/09-ssrf/README.md
+    mode: taint
+    pattern-sources:
+      # Next.js / Web API: query string, JSON and form bodies.
+      - pattern: new URL($REQ.url).searchParams.get(...)
+      - pattern: $REQ.nextUrl.searchParams.get(...)
+      - pattern: await $REQ.json()
+      - pattern: (await $REQ.formData()).get(...)
+      # Server Actions: fields of a FormData parameter.
+      - patterns:
+          - pattern-inside: |
+              async function $ACTION(..., $FD: FormData, ...) { ... }
+          - pattern: $FD.get(...)
+      # Express: req.query / req.body / req.params.
+      - pattern: $REQ.query
+      - pattern: $REQ.body
+      - pattern: $REQ.params
+      # NestJS: decorated handler parameters.
+      - patterns:
+          - pattern-either:
+              - pattern-inside: |
+                  $METHOD(..., @$DEC(...) $PARAM, ...) { ... }
+              - pattern-inside: |
+                  $METHOD(..., @$DEC(...) $PARAM: $TYPE, ...) { ... }
+          - pattern: $PARAM
+          - metavariable-regex:
+              metavariable: $DEC
+              regex: ^(Query|Param|Body|Headers)$
+    pattern-sanitizers:
+      # Allowlist checks such as `if (!isAllowedUrl(url)) return ...` or
+      # `assertAllowedUrl(url)` clean the variable they were called with.
+      - by-side-effect: true
+        patterns:
+          - pattern: $CHECK($URL)
+          - focus-metavariable: $URL
+          - metavariable-regex:
+              metavariable: $CHECK
+              # isAllowedUrl, assertAllowedUrl, validateUrl, isSafeTarget, ...
+              regex: (?i)^(is|assert|ensure|validate|check|verify)(safe|allowed|allowlisted|trusted|permitted)?(url|uri|host|hostname|origin|target)$
+      # Lookup in a constant map (UPPER_CASE name) yields a trusted value.
+      - patterns:
+          - pattern: $MAP[$KEY]
+          - metavariable-regex:
+              metavariable: $MAP
+              regex: ^[A-Z][A-Z0-9_]*$
+      # Encoding keeps a value inside a path or query component.
+      - pattern: encodeURIComponent(...)
+    pattern-sinks:
+      - patterns:
+          - pattern-either:
+              - pattern: fetch($URL, ...)
+              - pattern: axios($URL, ...)
+              - pattern: got($URL, ...)
+              # axios.get(url), got.post(url), https.get(url), this.httpService.get(url) ...
+              - patterns:
+                  - pattern-either:
+                      - pattern: $HTTPMOD.$METHOD($URL, ...)
+                      - pattern: this.$HTTPMOD.$METHOD($URL, ...)
+                      - pattern: this.$HTTPMOD.axiosRef.$METHOD($URL, ...)
+                  - metavariable-regex:
+                      metavariable: $METHOD
+                      regex: ^(get|post|put|patch|delete|head|options|request)$
+                  # Only HTTP clients: axios, got, node http/https, Nest HttpService.
+                  - metavariable-regex:
+                      metavariable: $HTTPMOD
+                      regex: (?i)^(axios|got|https?|httpService|http_?client|httpClient)$
+          - focus-metavariable: $URL
+          # A template literal that starts with a fixed scheme and host only
+          # lets the user control the path.
+          - pattern-not: "`https://$HOST/...`"

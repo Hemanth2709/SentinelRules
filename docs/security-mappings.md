@@ -14,18 +14,23 @@ OWASP categories refer to the OWASP Top 10 **2021**.
 | `sentinel-cors-credentials-any-origin` | CWE-942, CWE-346 | A05 Security Misconfiguration, A01 Broken Access Control | Permissive credentialed cross-origin policy |
 | `sentinel-nestjs-route-missing-guard` | CWE-862 | A01 Broken Access Control | Candidate missing authorization |
 | `sentinel-nextjs-handler-missing-auth-check` | CWE-862, CWE-306 | A01 Broken Access Control, A07 | Candidate missing authorization (CWE-862, A01) or authentication (CWE-306, A07) |
+| `sentinel-ssrf-user-controlled-url` | CWE-918 | A10 Server-Side Request Forgery | The server requests a URL the client chose |
+| `sentinel-open-redirect-user-controlled-url` | CWE-601 | A01 Broken Access Control | Redirect to an untrusted site; CWE-601 is listed under A01 in 2021 |
+| `sentinel-mass-assignment-unfiltered-body` | CWE-915 | A08 Software and Data Integrity Failures, A01 Broken Access Control | Client sets object attributes it should not control; A01 because the usual impact is privilege escalation (OWASP API3:2023, broken object property level authorization) |
+| `sentinel-code-injection-eval-user-input` | CWE-95, CWE-94 | A03 Injection | Request data evaluated as code |
 
 ## Where each CWE sits in the OWASP Top 10 2021 CWE lists
 
 | CWE | 2021 category |
 |---|---|
-| CWE-79, CWE-89 | A03 Injection |
-| CWE-200, CWE-862, CWE-1275 | A01 Broken Access Control |
+| CWE-79, CWE-89, CWE-94, CWE-95 | A03 Injection |
+| CWE-200, CWE-601, CWE-862, CWE-1275 | A01 Broken Access Control |
 | CWE-347 | A02 Cryptographic Failures |
 | CWE-522 | A04 Insecure Design |
 | CWE-614, CWE-942, CWE-1004 | A05 Security Misconfiguration |
 | CWE-306, CWE-346, CWE-613 | A07 Identification and Authentication Failures |
 | CWE-915 | A08 Software and Data Integrity Failures |
+| CWE-918 | A10 Server-Side Request Forgery |
 
 Some rules list an OWASP category that differs from the official list for
 one of their CWEs, because the category describes the configuration problem
@@ -35,7 +40,7 @@ and A01 for CWE-200). The table above makes the official placement visible.
 ## Review notes
 
 - Mappings were reviewed against the CWE definitions while writing each rule
-  (2026-10-25). They have not been independently reviewed by a second person.
+  (2026-10-25; rules 09–12 on 2026-11-04). They have not been independently reviewed by a second person.
 - Where a rule detects a *suspicious configuration* rather than a confirmed
   weakness (JWT algorithms, missing authorization), the CWE describes the
   weakness the finding may indicate.

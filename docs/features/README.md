@@ -22,3 +22,7 @@ Each rule has its own folder with the same seven documents:
 | 06 | [Insecure cookies](06-insecure-cookies/README.md) | `sentinel-insecure-session-cookie` | Released (v0.1.0) |
 | 07 | [CORS misconfiguration](07-cors-misconfiguration/README.md) | `sentinel-cors-credentials-any-origin` | Released (v0.1.0) |
 | 08 | [Missing authorization](08-missing-authorization/README.md) | `sentinel-nestjs-route-missing-guard`, `sentinel-nextjs-handler-missing-auth-check` | Released (v0.1.0) |
+| 09 | [SSRF](09-ssrf/README.md) | `sentinel-ssrf-user-controlled-url` | Tested (v0.2.0) |
+| 10 | [Open redirect](10-open-redirect/README.md) | `sentinel-open-redirect-user-controlled-url` | Tested (v0.2.0) |
+| 11 | [Mass assignment](11-mass-assignment/README.md) | `sentinel-mass-assignment-unfiltered-body` | Tested (v0.2.0) |
+| 12 | [Code injection](12-code-injection/README.md) | `sentinel-code-injection-eval-user-input` | Tested (v0.2.0) |

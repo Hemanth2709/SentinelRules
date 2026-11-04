@@ -22,7 +22,7 @@ these early, in code review and CI.
 
 ## Objectives
 
-- Eight rule features (ten rule IDs) for NestJS / Next.js.
+- Twelve rule features (fourteen rule IDs) for NestJS / Next.js.
 - At least two positive and two negative test cases per rule.
 - CWE and OWASP Top 10 2021 mappings.
 - Vulnerable and secure examples with remediation.
@@ -47,11 +47,17 @@ React, Express-style APIs, Prisma, TypeORM, Knex, node-postgres,
 | 06 | [Insecure cookies](docs/features/06-insecure-cookies/README.md) | `sentinel-insecure-session-cookie` | NestJS / Next.js | Missing cookie security attributes | WARNING | Released |
 | 07 | [CORS misconfiguration](docs/features/07-cors-misconfiguration/README.md) | `sentinel-cors-credentials-any-origin` | NestJS / Node.js | Overly permissive credentialed CORS | ERROR | Released |
 | 08 | [Missing authorization](docs/features/08-missing-authorization/README.md) | `sentinel-nestjs-route-missing-guard` · `sentinel-nextjs-handler-missing-auth-check` | NestJS / Next.js | Potential missing access control (heuristic) | WARNING | Released |
+| 09 | [SSRF](docs/features/09-ssrf/README.md) | `sentinel-ssrf-user-controlled-url` | Next.js / NestJS / Express | Request data used as an outbound URL | WARNING | Tested (v0.2.0) |
+| 10 | [Open redirect](docs/features/10-open-redirect/README.md) | `sentinel-open-redirect-user-controlled-url` | Next.js / NestJS / Express | Request data used as a redirect target | WARNING | Tested (v0.2.0) |
+| 11 | [Mass assignment](docs/features/11-mass-assignment/README.md) | `sentinel-mass-assignment-unfiltered-body` | Prisma / TypeORM / Sequelize / Mongoose | Whole request body written to the database | WARNING | Tested (v0.2.0) |
+| 12 | [Code injection](docs/features/12-code-injection/README.md) | `sentinel-code-injection-eval-user-input` | Node.js / Next.js / NestJS | Request data executed with eval, Function or vm | ERROR | Tested (v0.2.0) |
 
 "Released" means the rule is part of
 [v0.1.1](https://github.com/Hemanth2709/SentinelRules/releases/tag/v0.1.1)
 and all of its positive and negative fixtures pass with the pinned Semgrep
-version. It does not mean the rule has been validated on real applications:
+version. "Tested (v0.2.0)" means the same for a rule that is on `main` but not
+yet in a release. Rules 09–12 use taint mode: they follow request data to the
+dangerous call within one file. It does not mean the rule has been validated on real applications:
 see the benchmark section below.
 
 ## Installation
@@ -78,6 +84,20 @@ semgrep scan --metrics=off --config rules/cors-misconfiguration.yml /path/to/app
 semgrep scan --metrics=off --config rules/ --sarif --output sentinel.sarif /path/to/app
 ```
 
+### As a GitHub Action
+
+```yaml
+- uses: actions/checkout@v5
+- uses: Hemanth2709/SentinelRules@<release tag or commit SHA>
+  with:
+    fail-on: error          # error | warning | none
+    upload-sarif: "true"    # needs permissions: security-events: write
+```
+
+Findings then appear in the repository's **Security → Code scanning** tab
+and inline on pull requests. All inputs:
+[docs/ci-cd-guide.md](docs/ci-cd-guide.md#scanning-another-application).
+
 ## Testing
 
 ```bash
@@ -97,8 +117,13 @@ Details: [docs/testing-guide.md](docs/testing-guide.md).
 [`.github/workflows/semgrep-tests.yml`](.github/workflows/semgrep-tests.yml)
 runs on every push and pull request: install pinned Semgrep → validate rules
 → run fixtures (failing if none are found) → check examples → write a job
-summary. See [docs/ci-cd-guide.md](docs/ci-cd-guide.md), including how to run
-the pack in another repository's CI.
+summary.
+[`.github/workflows/code-scanning.yml`](.github/workflows/code-scanning.yml)
+uploads the findings for `examples/vulnerable` to this repository's code
+scanning from `main` (every alert there is deliberate) and self-tests the
+action on every push and pull request. See
+[docs/ci-cd-guide.md](docs/ci-cd-guide.md), including how to run the pack in
+another repository's CI.
 
 ## CWE and OWASP mappings
 
@@ -114,6 +139,10 @@ the pack in another repository's CI.
 | `sentinel-cors-credentials-any-origin` | CWE-942, CWE-346 | A05, A01 |
 | `sentinel-nestjs-route-missing-guard` | CWE-862 | A01 |
 | `sentinel-nextjs-handler-missing-auth-check` | CWE-862, CWE-306 | A01, A07 |
+| `sentinel-ssrf-user-controlled-url` | CWE-918 | A10 |
+| `sentinel-open-redirect-user-controlled-url` | CWE-601 | A01 |
+| `sentinel-mass-assignment-unfiltered-body` | CWE-915 | A08, A01 |
+| `sentinel-code-injection-eval-user-input` | CWE-95, CWE-94 | A03 |
 
 Rationale: [docs/security-mappings.md](docs/security-mappings.md).
 
@@ -156,11 +185,14 @@ Every feature has the same before/after pair in `examples/` and in its
 
 Methodology: [docs/benchmark-methodology.md](docs/benchmark-methodology.md).
 
-**Ground-truth benchmark:** a deliberately vulnerable NestJS + Next.js app
-with 26 planted vulnerabilities and 20 safe look-alikes. With v0.1.1 the
-rules reach **75% precision and 65% recall** over the categories they cover.
-The first run found one unpredicted miss (`sql +=` inside an `if`), which
-was fixed in v0.1.1.
+**Ground-truth benchmark:** a deliberately vulnerable NestJS + Next.js app,
+now with 30 planted vulnerabilities and 24 safe look-alikes. With rules 09–12
+(pre-release) the pack reaches **74% precision and 67% recall** over all 30
+planted cases, up from 50% for v0.1.1 on the same app; every result matched
+the predictions recorded before the scan. On the original 26/20 version,
+v0.1.1 reached 75% precision and 65% recall over the categories it covered;
+the first run found one unpredicted miss (`sql +=` inside an `if`), fixed in
+v0.1.1.
 
 **Real applications:** three applications scanned (a NestJS identity provider
 with a Next.js SDK, a NestJS event-booking API, and a Next.js portfolio). Latest runs: **3

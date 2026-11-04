@@ -5,6 +5,30 @@ All notable changes are recorded here. The format follows
 
 ## [Unreleased]
 
+### Added
+- Four taint-mode rules (DEC-010), each with fixtures, vulnerable and secure
+  examples, and seven feature documents:
+  - `sentinel-ssrf-user-controlled-url` (CWE-918, A10): request data used as
+    the URL of `fetch`, `axios`, `got`, `http(s)` or NestJS `HttpService`.
+  - `sentinel-open-redirect-user-controlled-url` (CWE-601, A01): request data
+    used as a redirect target (`NextResponse.redirect`, `redirect()`,
+    `res.redirect`, `@Redirect()` handlers).
+  - `sentinel-mass-assignment-unfiltered-body` (CWE-915, A08/A01): a whole
+    request body written or spread into Prisma, TypeORM, Sequelize or
+    Mongoose writes, or `Object.assign`.
+  - `sentinel-code-injection-eval-user-input` (CWE-95/94, A03): request data
+    executed with `eval`, `Function`, string `setTimeout`/`setInterval` or
+    `node:vm`.
+- Composite GitHub Action (`action.yml`): scans with the pack, writes SARIF,
+  optionally uploads it to GitHub code scanning, and fails at a chosen level
+  (`fail-on: error | warning | none`).
+- `scripts/sarif-postprocess.py`: stable `sentinel-…` rule IDs, a
+  `security-severity` per rule (ERROR → High, WARNING → Medium), and the tool
+  reported as "Sentinel Rules".
+- `code-scanning.yml` workflow: uploads findings for `examples/vulnerable` to
+  this repository's code scanning from `main`, and self-tests the action's
+  threshold on every push and pull request.
+
 ## [0.1.1] - 2026-11-03
 
 ### Fixed

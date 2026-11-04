@@ -148,3 +148,43 @@
 - **Consequences:** The observed cross-rule false positive is recorded in
   Rule 08's limitations.
 - **Related:** Rules 06 and 08, CI.
+
+### DEC-009: Map rule level to GitHub security-severity
+
+- **Status:** Accepted
+- **Date:** 2026-11-04
+- **Context:** GitHub code scanning ranks security alerts by a
+  `security-severity` score that Semgrep's SARIF does not include, so every
+  alert would otherwise be unranked.
+- **Decision:** `scripts/sarif-postprocess.py` sets `security-severity` from
+  the rule's own level: ERROR → 7.5 (High), WARNING → 5.0 (Medium), other →
+  3.0 (Low). It also strips the config-path prefix from rule IDs.
+- **Reason:** The rule level is already the project's judgement of
+  severity; a fixed mapping keeps the two consistent and avoids inventing
+  per-rule scores.
+- **Consequences:** The value is a band, not a CVSS score. Changing a rule's
+  level changes its code scanning severity.
+- **Related:** `action.yml`, `.github/workflows/code-scanning.yml`.
+
+### DEC-010: Use taint mode for request-to-sink rules
+
+- **Status:** Accepted
+- **Date:** 2026-11-04
+- **Context:** SSRF, open redirect, mass assignment and code injection are
+  dangerous only when request data reaches a specific call. Rules 01–08
+  match syntax at the call site and cannot tell a constant from a request
+  value.
+- **Decision:** Rules 09–12 use Semgrep taint mode with shared request
+  sources (Next.js/Web API request parsing, Server Action `FormData`,
+  Express `req.*`, NestJS `@Query/@Param/@Body/@Headers` parameters) and
+  rule-specific sinks. Sanitizers are limited to allowlist-style checks by
+  name, constant UPPER_CASE maps, `encodeURIComponent`, and schema parsing
+  for mass assignment.
+- **Reason:** Taint mode removes most false positives from constants and
+  fixed origins while keeping each rule small and testable.
+- **Consequences:** Analysis is still single-file (no cross-file taint), and
+  name-based sanitizers are trusted: a misnamed check silences a finding.
+  Both are recorded in each feature's `limitations.md`. Rules 01 and 05 stay
+  syntactic for now.
+- **Related:** Rules 09–12.
+

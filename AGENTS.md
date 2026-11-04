@@ -43,8 +43,8 @@ anything claiming to *prove* authorization is correct.
 | 3. Rules 06–08 and CI | 2026-11-15 | Complete |
 | 4. Benchmark and release | 2026-11-21 | Complete |
 
-- **Rules:** 8 rule files containing 10 rule IDs.
-- **Tests:** 47 `ruleid` (must flag) and 47 `ok` (must not flag) annotations,
+- **Rules:** 12 rule files containing 14 rule IDs (rules 09–12 are on `main`, not yet released).
+- **Tests:** 76 `ruleid` (must flag) and 68 `ok` (must not flag) annotations,
   all passing with Semgrep 1.180.0.
 - **CI:** green on `main` (GitHub Actions, Linux). The tests have also been
   verified on Windows (Git Bash, Python 3.14).
@@ -78,6 +78,10 @@ anything claiming to *prove* authorization is correct.
 | 07 | CORS | `sentinel-cors-credentials-any-origin` | ERROR | `origin: true`, or an always-allow/echo origin callback, combined with `credentials: true`, or a reflected `Origin` header plus `Allow-Credentials`. |
 | 08 | Authorization (heuristic) | `sentinel-nestjs-route-missing-guard` | WARNING | A NestJS route with no `@UseGuards` on the method or class and no `@Public()`/`@SkipAuth()`/`@AllowAnonymous()`. |
 | 08 | Authorization (heuristic) | `sentinel-nextjs-handler-missing-auth-check` | WARNING | `POST`/`PUT`/`PATCH`/`DELETE` route handlers and `export async function` Server Actions with no recognised auth call (`getServerSession`, `auth`, `getToken`, `currentUser`, `*.auth.getUser`, ...). |
+| 09 | SSRF (taint) | `sentinel-ssrf-user-controlled-url` | WARNING | Request data reaching the URL of `fetch`, `axios`, `got`, `http(s)` or `this.httpService`. Sanitized by allowlist-named checks, constant maps, `encodeURIComponent`, fixed `https://host/` templates. |
+| 10 | Open redirect (taint) | `sentinel-open-redirect-user-controlled-url` | WARNING | Request data reaching `NextResponse.redirect`, `redirect()`, `Response.redirect`, `res.redirect` or `{ url }` from `@Redirect()`. |
+| 11 | Mass assignment (taint) | `sentinel-mass-assignment-unfiltered-body` | WARNING | A whole request body (or a spread of it) as the value of a Prisma/TypeORM/Sequelize/Mongoose write or `Object.assign`. Picked fields are never a sink; schema `.parse()` sanitizes. |
+| 12 | Code injection (taint) | `sentinel-code-injection-eval-user-input` | ERROR | Request data reaching `eval`, `Function`, string `setTimeout`/`setInterval` or `node:vm`. |
 
 Each rule has CWE and OWASP Top 10 (2021) metadata, references, and a
 `documentation` link to `docs/features/NN-name/`.
@@ -94,11 +98,14 @@ examples/secure/           The corrected version of each vulnerable example
 scripts/run-tests.sh       Runs fixtures one rule file at a time (works on Windows)
 scripts/check-examples.sh  Each rule must flag its vulnerable example and not its secure one
 .github/workflows/semgrep-tests.yml   CI: validate, run-tests, check-examples, job summary
+.github/workflows/code-scanning.yml   SARIF upload of examples/vulnerable; action self-test
+action.yml                 Composite GitHub Action (scan, SARIF, threshold, upload)
+scripts/sarif-postprocess.py          Stable rule IDs, security-severity, fail-on threshold
 docs/features/NN-name/     7 docs per rule: README, vulnerability-explanation,
                            detection-logic, remediation, testing-notes,
                            limitations, implementation-log
 docs/benchmark-*.md        Methodology and results of real-app scans
-docs/decisions/decision-log.md        DEC-001 … DEC-008 (design decisions)
+docs/decisions/decision-log.md        DEC-001 … DEC-010 (design decisions)
 docs/milestones/           One log per milestone
 docs/learning-notes/       Concepts and lessons learned
 CHANGELOG.md               Keep a Changelog format
@@ -122,7 +129,7 @@ semgrep --test --config rules/cors-misconfiguration.yml tests/cors-misconfigurat
 semgrep scan --metrics=off --config rules/ /path/to/app
 ```
 
-Expected output: `All 8 rule files passed.` and 16 `PASS` lines.
+Expected output: `All 12 rule files passed.` and 24 `PASS` lines.
 
 ---
 
@@ -224,6 +231,7 @@ Expected output: `All 8 rule files passed.` and 16 `PASS` lines.
 | 3 | [HemanthG](https://github.com/Hemanth2709/HemanthG) `c0d7ad5` | 1 | 0 | 1 | JSON-LD from static data. Rule now accepts the escaped form; the portfolio was fixed and now scans clean |
 | GT | Ground-truth vulnerable app (26 V / 20 S), v0.1.0 | 19 | 14 | 5 | Precision 74%, recall 61%. Unpredicted miss V-02 (`sql +=` inside `if`) |
 | GT | Same, v0.1.1 | 20 | 15 | 5 | Precision 75%, recall 65%. V-02 fixed; all FPs are public-by-design routes |
+| GT | Extended app (30 V / 24 S), rules 09–12 (`add589d`) | 27 | 20 | 7 | Precision 74%, recall 67% of all 30. Matched every prediction; 2 new FPs predicted (S-22 inline check, Record-typed DB helper) |
 
 ---
 
@@ -238,17 +246,19 @@ Priority order:
    - Scan 10–20 public open-source NestJS/Next.js repos. Report any real bug
      privately to its maintainers.
    - Add a CI job that re-scans pinned repos and fails on unexpected changes.
-3. **SARIF upload to GitHub code scanning,** so findings appear in the
-   Security tab and inline on PRs.
+3. ~~SARIF upload to GitHub code scanning~~ (done: `action.yml`,
+   `.github/workflows/code-scanning.yml`, `scripts/sarif-postprocess.py`).
 4. **v0.2.0.**
-   - Taint mode for SQL injection and XSS (request source → sink).
-   - New rules: SSRF (`fetch` of a user URL), open redirect
-     (`redirect(searchParams...)`), mass assignment via spread into Prisma
-     `create`/`update`, missing Helmet, overly broad `next.config` image
-     `remotePatterns`, `eval`/`new Function` on request data.
+   - Taint mode for SQL injection and XSS (request source → sink); rules
+     09–12 already use it (DEC-010).
+   - ~~New rules: SSRF, open redirect, mass assignment, `eval`/`new Function`~~
+     (done: rules 09–12, taint mode).
+   - Still open: missing Helmet, overly broad `next.config` image
+     `remotePatterns`.
    - Close the documented gaps in section 8.
 5. **Distribution:**
-   - a reusable GitHub Action (`uses: Hemanth2709/SentinelRules@v0.x`)
+   - ~~a reusable GitHub Action~~ (done: `action.yml`; usable by tag once
+     v0.2.0 is released)
    - submitting the strongest rules to the Semgrep Registry
    - optional Semgrep `fix:` suggestions for simple cases (keep them
      suggestions, not an auto-fix engine)
