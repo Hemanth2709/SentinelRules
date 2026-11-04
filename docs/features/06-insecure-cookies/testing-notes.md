@@ -33,6 +33,7 @@ scripts/run-tests.sh
 | Date | Semgrep | Result |
 |---|---|---|
 | 2026-10-25 | 1.180.0 | `✓ All tests passed` (5 findings, 4 non-findings) |
+| 2026-11-04 | 1.180.0 | v0.3.0: `✓ All tests passed` (8 findings, 6 non-findings); direct scan 8 findings, no duplicates |
 
 ## Failures and resolutions
 
@@ -40,3 +41,4 @@ scripts/run-tests.sh
 |---|---|---|
 | 2026-10-25 | The first draft used two rule IDs (missing attributes, `secure: false`). Merging them into one `pattern-either` with a bare `pattern-not` failed validation: "you cannot negate in an Or". | Wrapped the negation in a nested `patterns` block with a positive `pattern` first. |
 | 2026-10-25 | Rule message wrapped the cookie name in extra quotes (`''session_id''`) because `$NAME` already includes its quotes. | Removed the quotes around `$NAME` in the message. |
+| 2026-11-04 | New fixtures for options taken from a constant failed against the v0.2.0 rule (`missed lines: [100, 105, 110]`). | Added a second branch: `const $OPTS = <object>` earlier in the file or function, then the same attribute checks on that object. |

@@ -39,3 +39,14 @@ The trade-off is documented in [limitations.md](limitations.md).
 - Secrets under ambiguous names (`NEXT_PUBLIC_OPENAI_API_KEY`).
 - Destructuring: `const { NEXT_PUBLIC_DB_PASSWORD } = process.env`.
 - `.env` files are not scanned (they are not JavaScript).
+
+## v0.3.0 additions
+
+- **Destructuring:** `const { NEXT_PUBLIC_X } = process.env`,
+  `const { NEXT_PUBLIC_X: alias } = process.env` and the `let` form bind
+  `$NAME` to the property name, which then goes through the same name checks.
+- **Provider keys:** the name regex also matches keys or tokens named
+  after providers that issue no browser-safe keys:
+  `NEXT_PUBLIC_*(OPENAI|ANTHROPIC|GROQ|MISTRAL|COHERE|REPLICATE|HUGGING_FACE|DEEPSEEK|SENDGRID|RESEND|MAILGUN|POSTMARK|TWILIO)*(KEY|TOKEN)*`,
+  and `*_TOKEN` names for GitHub, GitLab, npm, Slack, Discord and Hugging
+  Face (`HF`). Generic `API_KEY` or `TOKEN` names are still not matched.

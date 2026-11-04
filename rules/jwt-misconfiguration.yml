@@ -128,6 +128,7 @@ rules:
       owasp:
         - "A07:2021 - Identification and Authentication Failures"
         - "A02:2021 - Cryptographic Failures"
+        - "A08:2021 - Software and Data Integrity Failures"
       references:
         - https://github.com/auth0/node-jsonwebtoken#jwtdecodetoken--options
         - https://datatracker.ietf.org/doc/html/rfc8725#section-3.2

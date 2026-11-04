@@ -13,9 +13,39 @@ All notable changes are recorded here. The format follows
   `images.remotePatterns` entries in a Next.js config that allow any host
   (`'*'`, `'**'`, or `new URL('https://**/...')`).
 
+- `sentinel-sql-injection-tainted-query` (CWE-89, A03, taint): request data
+  reaching raw SQL through variables, string building or helpers in other
+  modules, including Prisma `Prisma.raw()`, Sequelize `literal()`, knex
+  `*Raw` helpers and TypeORM query-builder conditions and ordering.
+- `sentinel-dom-html-sink-user-input` (CWE-79, A03, taint): URL, referrer,
+  `useSearchParams()` or request data written to `innerHTML`, `outerHTML`,
+  `insertAdjacentHTML`, `document.write`, or an HTML response.
+- `sentinel-jwt-decode-without-verify` (CWE-347/345, A07/A02/A08, audit):
+  `jsonwebtoken` `decode()` in a function that never verifies the token.
+- `sentinel-cors-weak-origin-check` (CWE-346/942, A05/A01): origin checks
+  that attacker-registered origins pass (`endsWith`/`includes` without a
+  leading dot, host-only `startsWith`, unanchored regexes).
+
 ### Changed
+- `sentinel-sql-injection-raw-query`: also follows SQL returned by a helper
+  function declared in the same file.
+- `sentinel-next-public-secret-env`: also matches destructuring from
+  `process.env`, and keys or tokens named after providers that issue no
+  browser-safe keys (OpenAI, Anthropic, GitHub tokens and others).
+- `sentinel-insecure-session-cookie`: also judges options taken from a
+  `const` object literal declared earlier in the same file or function.
+- `sentinel-cors-credentials-any-origin`: also covers Web Fetch API headers
+  (`response.headers.set(...)`) reflecting the request Origin with
+  credentials.
 - The secure CORS and ValidationPipe examples now register `helmet()`; the
   new rule correctly flagged both.
+
+### Benchmark
+- Ground-truth app extended to 37 planted vulnerabilities and 30 safe
+  look-alikes. On the same app commit: 80% precision and 89% recall (33/37)
+  for these changes, against 75% and 65% (24/37) for the rules before them.
+  All nine new detections were predicted before the scan, and there were no
+  new false positives.
 
 ## [0.2.0] - 2026-11-04
 

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Rule ID | `sentinel-react-dangerously-set-inner-html` |
+| Rule IDs | `sentinel-react-dangerously-set-inner-html`, `sentinel-dom-html-sink-user-input` (taint mode, v0.3.0, `rules/unsafe-html-tainted.yml`) |
 | Rule file | [`rules/unsafe-html.yml`](../../../rules/unsafe-html.yml) |
 | Test fixture | [`tests/unsafe-html.tsx`](../../../tests/unsafe-html.tsx) |
 | Examples | [vulnerable](../../../examples/vulnerable/unsafe-html.tsx) · [secure](../../../examples/secure/unsafe-html.tsx) |

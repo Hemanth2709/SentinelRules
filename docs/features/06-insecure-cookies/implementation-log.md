@@ -7,3 +7,4 @@
 | 2026-10-25 | Restricted to session-like literal cookie names and to `cookies()` / `.cookies` receivers for `.set()` | Distinguish session cookies from other cookies; avoid `Map.set` | `setPreferences`, `cacheSet` negative fixtures | Pass |
 | 2026-10-25 | Fixed doubled quotes in message | Cosmetic | Direct scan | Fixed |
 | 2026-10-25 | Wrote feature documentation and examples | Milestone 3 deliverable | `scripts/check-examples.sh` | Pass |
+| 2026-11-04 | Options from a `const` object literal declared earlier in the same file or function | Documented false negative; benchmark V-14 | Fixtures failed first, then pass; benchmark V-14 detected, S-28 (secure constant) clean | Pass |

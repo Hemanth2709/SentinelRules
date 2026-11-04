@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Rule ID | `sentinel-sql-injection-raw-query` |
+| Rule IDs | `sentinel-sql-injection-raw-query`, `sentinel-sql-injection-tainted-query` (taint mode, v0.3.0, `rules/sql-injection-tainted.yml`) |
 | Rule file | [`rules/sql-injection.yml`](../../../rules/sql-injection.yml) |
 | Test fixture | [`tests/sql-injection.ts`](../../../tests/sql-injection.ts) |
 | Examples | [vulnerable](../../../examples/vulnerable/sql-injection.ts) · [secure](../../../examples/secure/sql-injection.ts) |

@@ -44,3 +44,13 @@ Rule file: [`rules/jwt-misconfiguration.yml`](../../../rules/jwt-misconfiguratio
 - `passport-jwt` strategies without `algorithms` are not reported.
 - `jwt.decode()` used *instead of* `verify()` is not detected.
 - Options assembled in variables or other files are not inspected.
+
+## `sentinel-jwt-decode-without-verify` (v0.3.0)
+
+1. The file imports or requires `jsonwebtoken` as `$J`.
+2. `$J.decode(...)` is called.
+3. The enclosing function, method, async method or arrow function contains no
+   `$V.verify(...)` or `$V.verifyAsync(...)` call. Any object counts, so
+   `@nestjs/jwt` and wrapper verifiers suppress the finding.
+
+Decoding to read the `kid` header and then verifying is therefore not reported.

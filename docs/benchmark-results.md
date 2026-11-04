@@ -74,6 +74,36 @@ and an exact host (S-26). Predictions were committed before the scan.
 - **No differences from the predictions.**
 - **Portfolio re-scanned with all 16 rules:** 0 findings.
 
+### v0.3.0 gap fixes and taint rules (2026-11-04)
+
+Six cases were added (now **37 planted, 30 safe**): V-36, a query parameter
+that reaches SQL through a helper in another module; V-37, `innerHTML` from
+`?message=`; and four safe look-alikes. Those were S-27 (decode, then
+verify), S-28 (a secure shared cookie constant), S-29 (a leading-dot origin
+check) and S-30 (`textContent` from the URL). Predictions for these and for
+the seven existing cases the changes affect were committed before the scan.
+
+| Rule pack | Findings | TP | FP | Precision | Recall (all 37 planted) |
+|---|---|---|---|---|---|
+| Before the gap fixes (`32d430e`) | 32 | 24 | 8 | 75% | 65% (24/37) |
+| Gap fixes and taint rules (`7fe1eef`) | 41 | 33 | 8 | 80% | 89% (33/37) |
+
+- **New detections (9):** V-03, V-06, V-10, V-11, V-14, V-16, V-17, V-36,
+  V-37. Every planted case in the SQL, JWT, public-secret, HTML, cookie and
+  CORS categories is now detected.
+- **No new false positives.** S-27 to S-30 stayed clean. One false positive
+  on unlabelled code appears with *both* rule packs: the controller added for
+  V-36 has no guard, and the authorization heuristic reports it. An
+  unauthenticated export endpoint is a real weakness, but it is not a
+  labelled case, so it is scored as a false positive. It was not relabelled
+  after the scan.
+- **Remaining misses (4):** V-23 (IDOR), V-28 (SSRF across files), V-30
+  (denylist mass assignment) and V-35 (dynamic image hostname). All are
+  documented limitations.
+- **No differences from the predictions.**
+- **Portfolio (run 3 app) re-scanned with all 20 rule IDs:** 0 findings
+  (84 files, 0 errors).
+
 ## Real applications
 
 

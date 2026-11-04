@@ -35,3 +35,20 @@ matching the call.
 - Next.js `headers()` in `next.config.js` or middleware that sets CORS
   headers.
 - Header names written in different case.
+
+## v0.3.0 additions
+
+**Web Fetch API headers.** Two statements in either order:
+
+1. `$H.set|append('Access-Control-Allow-Origin', …request.headers.get('origin')…)`;
+2. `$H2.set|append('Access-Control-Allow-Credentials', 'true')`.
+
+This covers Next.js route handlers and middleware.
+
+**`sentinel-cors-weak-origin-check`.** Applies to a value named `origin`
+(`requestOrigin`, `reqOrigin` and `originHeader` also count). It is
+reported for:
+
+- `endsWith(…)` or `includes(…)` with a string that does not start with `.`;
+- `startsWith('http(s)://host')` with no path separator after the host;
+- `/regex/.test(origin)` where the regex is not anchored at both ends.

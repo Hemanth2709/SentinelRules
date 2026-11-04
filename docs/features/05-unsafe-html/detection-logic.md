@@ -39,3 +39,23 @@ attribute: the key is only used for this API, and it also catches
   `html-react-parser`, `document.write`.
 - The rule trusts any call named `sanitize` and does not check sanitizer
   configuration.
+
+## `sentinel-dom-html-sink-user-input` (v0.3.0, taint mode)
+
+- **Sources:**
+  - the browser URL (`window.location.*`, `location.*`,
+    `document.location.*`, `document.URL`, `document.documentURI`);
+  - `document.referrer` and `window.name`;
+  - Next.js `useSearchParams()`;
+  - the server request-data sources used by the other taint rules.
+- **Sinks:**
+  - `innerHTML` and `outerHTML` assignments, `insertAdjacentHTML`,
+    `document.write` and `document.writeln`;
+  - Express `send`/`write`/`end` when the string is a template or `+`
+    concatenation built in the call;
+  - any value after `res.type('…html…')`;
+  - `new Response(value, { headers: { 'Content-Type': 'text/html…' } })`.
+- **Sanitizers:** `DOMPurify.sanitize`, `sanitizeHtml`, and calls named
+  `escape*`, `encode`, `encodeHtml`, `encodeEntities`, `sanitize*` or `purify`.
+
+`dangerouslySetInnerHTML` is left to `sentinel-react-dangerously-set-inner-html`.

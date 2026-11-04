@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Rule IDs | `sentinel-jwt-ignore-expiration`, `sentinel-jwt-verify-missing-algorithms` |
+| Rule IDs | `sentinel-jwt-ignore-expiration`, `sentinel-jwt-verify-missing-algorithms`, `sentinel-jwt-decode-without-verify` (v0.3.0) |
 | Rule file | [`rules/jwt-misconfiguration.yml`](../../../rules/jwt-misconfiguration.yml) |
 | Test fixture | [`tests/jwt-misconfiguration.ts`](../../../tests/jwt-misconfiguration.ts) |
 | Examples | [vulnerable](../../../examples/vulnerable/jwt-misconfiguration.ts) · [secure](../../../examples/secure/jwt-misconfiguration.ts) |

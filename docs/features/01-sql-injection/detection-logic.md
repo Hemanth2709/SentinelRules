@@ -59,3 +59,31 @@ The rule reports a call when all of these hold:
 - Sinks under other method names. `sequelize.query(...)` matches because the
   method is named `query` (confirmed in an ad-hoc scan on 2026-10-25, no
   fixture yet); a custom `runSql()` wrapper does not.
+
+## v0.3.0 additions
+
+**Same-file helpers (branch 3 of `sentinel-sql-injection-raw-query`).** When
+the query argument is a call, `$DB.$METHOD($HELPER(...))`, and `$HELPER` is a
+`function` or `const` arrow function declared earlier in the same file that
+returns dynamic SQL, the returned expression goes through the same dynamic-SQL
+and SQL-keyword checks as branches 1 and 2.
+
+**Taint rule (`sentinel-sql-injection-tainted-query`).**
+
+- Sources: request data. That is Next.js `searchParams.get`, `request.json()`
+  and `formData()`, Server Action `FormData`, Express
+  `req.query`/`req.body`/`req.params`, and NestJS `@Query`/`@Param`/`@Body`/`@Headers`
+  parameters.
+- Sinks:
+  - the SQL argument of `$queryRawUnsafe`, `$executeRawUnsafe`, `.query`,
+    `.raw` (including `Prisma.raw` and `knex.raw`) and `.execute`;
+  - Sequelize `literal()`;
+  - knex `*Raw` helpers;
+  - the first argument of TypeORM query-builder `where`/`having`/`orderBy`/`groupBy`
+    methods.
+- Sanitizers: `Number`, `parseInt`, `parseFloat`, `BigInt`, `escape*`
+  functions and lookups in an UPPER_CASE constant map.
+- Unknown functions pass taint through, which is what lets a helper in
+  another module be followed.
+- SQL interpolated or concatenated directly in a raw query call is skipped,
+  because the structural rule already reports it.

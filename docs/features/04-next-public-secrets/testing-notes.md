@@ -33,7 +33,9 @@ scripts/run-tests.sh
 | Date | Semgrep | Result |
 |---|---|---|
 | 2026-10-25 | 1.180.0 | `✓ All tests passed` (4 findings, 5 non-findings) on first run |
+| 2026-11-04 | 1.180.0 | v0.3.0: `✓ All tests passed` (9 findings, 9 non-findings); direct scan 9 findings, no duplicates |
 
 ## Failures and resolutions
 
 None recorded.
+| 2026-11-04 | New fixtures for destructuring and provider keys failed against the v0.2.0 rule (`missed lines: [34, 37, 42, 45, 48]`). | Added destructuring patterns (plain and renamed) and the provider-name alternative in the name regex. |
