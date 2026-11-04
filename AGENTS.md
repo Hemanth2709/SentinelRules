@@ -94,11 +94,14 @@ examples/secure/           The corrected version of each vulnerable example
 scripts/run-tests.sh       Runs fixtures one rule file at a time (works on Windows)
 scripts/check-examples.sh  Each rule must flag its vulnerable example and not its secure one
 .github/workflows/semgrep-tests.yml   CI: validate, run-tests, check-examples, job summary
+.github/workflows/code-scanning.yml   SARIF upload of examples/vulnerable; action self-test
+action.yml                 Composite GitHub Action (scan, SARIF, threshold, upload)
+scripts/sarif-postprocess.py          Stable rule IDs, security-severity, fail-on threshold
 docs/features/NN-name/     7 docs per rule: README, vulnerability-explanation,
                            detection-logic, remediation, testing-notes,
                            limitations, implementation-log
 docs/benchmark-*.md        Methodology and results of real-app scans
-docs/decisions/decision-log.md        DEC-001 … DEC-008 (design decisions)
+docs/decisions/decision-log.md        DEC-001 … DEC-009 (design decisions)
 docs/milestones/           One log per milestone
 docs/learning-notes/       Concepts and lessons learned
 CHANGELOG.md               Keep a Changelog format
@@ -238,8 +241,8 @@ Priority order:
    - Scan 10–20 public open-source NestJS/Next.js repos. Report any real bug
      privately to its maintainers.
    - Add a CI job that re-scans pinned repos and fails on unexpected changes.
-3. **SARIF upload to GitHub code scanning,** so findings appear in the
-   Security tab and inline on PRs.
+3. ~~SARIF upload to GitHub code scanning~~ (done: `action.yml`,
+   `.github/workflows/code-scanning.yml`, `scripts/sarif-postprocess.py`).
 4. **v0.2.0.**
    - Taint mode for SQL injection and XSS (request source → sink).
    - New rules: SSRF (`fetch` of a user URL), open redirect
@@ -248,7 +251,8 @@ Priority order:
      `remotePatterns`, `eval`/`new Function` on request data.
    - Close the documented gaps in section 8.
 5. **Distribution:**
-   - a reusable GitHub Action (`uses: Hemanth2709/SentinelRules@v0.x`)
+   - ~~a reusable GitHub Action~~ (done: `action.yml`; usable by tag once
+     v0.2.0 is released)
    - submitting the strongest rules to the Semgrep Registry
    - optional Semgrep `fix:` suggestions for simple cases (keep them
      suggestions, not an auto-fix engine)

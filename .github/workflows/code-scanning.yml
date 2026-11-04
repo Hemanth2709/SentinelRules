@@ -1,0 +1,79 @@
+name: Code scanning
+
+# Uploads Sentinel Rules findings for examples/vulnerable to GitHub code
+# scanning, so the alerts appear in this repository's Security tab and inline
+# on pull requests. Every alert here is deliberate: those files exist to be
+# flagged. The self-test job checks the action's pass/fail threshold.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sarif:
+    name: Upload SARIF (vulnerable examples)
+    runs-on: ubuntu-latest
+    # Pull requests from forks get a read-only token and cannot upload.
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Scan with the local action
+        uses: ./
+        with:
+          path: examples/vulnerable
+          fail-on: none
+          upload-sarif: "true"
+          category: sentinel-rules-examples
+
+  action-self-test:
+    name: Action threshold self-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      # The vulnerable examples contain ERROR-level findings, so this must fail.
+      - name: Vulnerable examples (expected to fail)
+        id: vulnerable
+        continue-on-error: true
+        uses: ./
+        with:
+          path: examples/vulnerable
+          fail-on: error
+          sarif-file: vulnerable.sarif
+
+      # The secure examples have one known WARNING-level heuristic finding
+      # (a public login route), so fail-on: error must pass.
+      - name: Secure examples (expected to pass)
+        uses: ./
+        with:
+          path: examples/secure
+          fail-on: error
+          sarif-file: secure.sarif
+
+      - name: Check outcomes
+        env:
+          VULNERABLE_OUTCOME: ${{ steps.vulnerable.outcome }}
+        run: |
+          echo "vulnerable examples step: ${VULNERABLE_OUTCOME}"
+          if [[ "${VULNERABLE_OUTCOME}" != "failure" ]]; then
+            echo "Expected the scan of examples/vulnerable to fail with fail-on: error."
+            exit 1
+          fi
+          python - <<'PY'
+          import json
+          ids = {r["ruleId"] for run in json.load(open("vulnerable.sarif"))["runs"] for r in run["results"]}
+          bad = sorted(i for i in ids if not i.startswith("sentinel-"))
+          assert not bad, f"rule IDs not normalised: {bad}"
+          print(f"{len(ids)} distinct rule IDs, all normalised")
+          PY

@@ -1,0 +1,88 @@
+name: Sentinel Rules
+description: Scan NestJS and Next.js code with the Sentinel Rules Semgrep pack, with optional SARIF upload to GitHub code scanning.
+author: Hemanth G
+branding:
+  icon: shield
+  color: blue
+
+inputs:
+  path:
+    description: Directory or file to scan, relative to the workspace.
+    default: "."
+  fail-on:
+    description: "Fail the step on findings at this level or above: error, warning or none."
+    default: error
+  sarif-file:
+    description: Where to write the SARIF report.
+    default: sentinel-rules.sarif
+  upload-sarif:
+    description: "Upload the SARIF report to GitHub code scanning (needs permissions: security-events: write)."
+    default: "false"
+  category:
+    description: Code scanning category, used to keep this upload separate from other analyses.
+    default: sentinel-rules
+  semgrep-version:
+    description: Semgrep version to install.
+    default: "1.180.0"
+
+outputs:
+  sarif-file:
+    description: Path of the SARIF report.
+    value: ${{ inputs.sarif-file }}
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v6
+      with:
+        python-version: "3.12"
+
+    - name: Install Semgrep
+      shell: bash
+      env:
+        SEMGREP_VERSION: ${{ inputs.semgrep-version }}
+      run: python -m pip install --quiet "semgrep==${SEMGREP_VERSION}"
+
+    - name: Scan
+      shell: bash
+      env:
+        SCAN_PATH: ${{ inputs.path }}
+        SARIF_FILE: ${{ inputs.sarif-file }}
+      # Text output goes to the log; SARIF is written alongside it.
+      # Findings never fail this step: the threshold is applied below.
+      run: |
+        semgrep scan --metrics=off --disable-version-check \
+          --config "${GITHUB_ACTION_PATH}/rules" \
+          --sarif-output="${SARIF_FILE}" \
+          "${SCAN_PATH}"
+
+    - name: Prepare SARIF and apply threshold
+      id: threshold
+      shell: bash
+      env:
+        SARIF_FILE: ${{ inputs.sarif-file }}
+        FAIL_ON: ${{ inputs.fail-on }}
+      # Records the threshold result instead of failing here, so the upload
+      # below still runs when the scan finds something.
+      run: |
+        set +e
+        python "${GITHUB_ACTION_PATH}/scripts/sarif-postprocess.py" "${SARIF_FILE}" --fail-on "${FAIL_ON}" \
+          | tee -a "$GITHUB_STEP_SUMMARY"
+        echo "status=${PIPESTATUS[0]}" >> "$GITHUB_OUTPUT"
+
+    - name: Upload to code scanning
+      if: inputs.upload-sarif == 'true'
+      uses: github/codeql-action/upload-sarif@v4
+      with:
+        sarif_file: ${{ inputs.sarif-file }}
+        category: ${{ inputs.category }}
+
+    - name: Fail on findings
+      if: steps.threshold.outputs.status != '0'
+      shell: bash
+      env:
+        FAIL_ON: ${{ inputs.fail-on }}
+      run: |
+        echo "Sentinel Rules found issues at or above fail-on: ${FAIL_ON}."
+        exit 1

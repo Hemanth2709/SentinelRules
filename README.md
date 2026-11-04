@@ -78,6 +78,20 @@ semgrep scan --metrics=off --config rules/cors-misconfiguration.yml /path/to/app
 semgrep scan --metrics=off --config rules/ --sarif --output sentinel.sarif /path/to/app
 ```
 
+### As a GitHub Action
+
+```yaml
+- uses: actions/checkout@v5
+- uses: Hemanth2709/SentinelRules@<release tag or commit SHA>
+  with:
+    fail-on: error          # error | warning | none
+    upload-sarif: "true"    # needs permissions: security-events: write
+```
+
+Findings then appear in the repository's **Security → Code scanning** tab
+and inline on pull requests. All inputs:
+[docs/ci-cd-guide.md](docs/ci-cd-guide.md#scanning-another-application).
+
 ## Testing
 
 ```bash
@@ -97,8 +111,12 @@ Details: [docs/testing-guide.md](docs/testing-guide.md).
 [`.github/workflows/semgrep-tests.yml`](.github/workflows/semgrep-tests.yml)
 runs on every push and pull request: install pinned Semgrep → validate rules
 → run fixtures (failing if none are found) → check examples → write a job
-summary. See [docs/ci-cd-guide.md](docs/ci-cd-guide.md), including how to run
-the pack in another repository's CI.
+summary.
+[`.github/workflows/code-scanning.yml`](.github/workflows/code-scanning.yml)
+uploads the findings for `examples/vulnerable` to this repository's code
+scanning (every alert there is deliberate) and self-tests the action. See
+[docs/ci-cd-guide.md](docs/ci-cd-guide.md), including how to run the pack in
+another repository's CI.
 
 ## CWE and OWASP mappings
 
